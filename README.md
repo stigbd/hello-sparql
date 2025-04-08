@@ -12,6 +12,6 @@ The simplest way to run the api and the ui is to use docker-compose:
 % docker compose up --build
 ```
 
-The ui is available at [http://localhost:3000](http://localhost:3000).
+The ui is available at [http://localhost:8501](http://localhost:8501).
 
 The api is available at [http://localhost:8000](http://localhost:8000) and it's documentation is available at [http://localhost:8000/docs](http://localhost:8000/docs).

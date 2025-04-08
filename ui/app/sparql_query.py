@@ -6,6 +6,7 @@ from http import HTTPStatus
 import httpx
 import pandas as pd
 import streamlit as st
+from code_editor import code_editor
 
 SPARQL_ENDPOINT = os.getenv("SPARQL_ENDPOINT", "http://localhost:8000/sparql")
 
@@ -64,9 +65,19 @@ def main() -> None:
 
     # Get query and data from user input:
     with right_col:
-        query = st.text_area(label="Query", height=400, value=initial_query)
+        response_dict_query = code_editor(
+            initial_query,
+            lang="turtle",
+            info={"info": [{"name": "Enter your SPARQL query here"}]},
+        )
+        query = response_dict_query["text"]
     with left_col:
-        data = st.text_area(label="Data", height=400, value=initial_data)
+        response_dict_data = code_editor(
+            initial_data,
+            lang="turtle",
+            info={"info": [{"name": "Enter your data here"}]},
+        )
+        data = response_dict_data["text"]
 
     if st.button("Run Query on Data"):
         try:

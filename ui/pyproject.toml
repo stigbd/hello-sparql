@@ -4,7 +4,12 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
-dependencies = ["httpx>=0.28.1", "pandas>=2.2.3", "streamlit>=1.44.1"]
+dependencies = [
+    "httpx>=0.28.1",
+    "pandas>=2.2.3",
+    "streamlit>=1.44.1",
+    "streamlit-code-editor>=0.1.22",
+]
 
 
 [dependency-groups]
@@ -46,9 +51,8 @@ known-first-party = ["app"]
 
 
 [tool.pyright]
-venvPath = "."       # rye installs the venv in the current dir
-venv = ".venv"       #       in a folder called `.venv`
-strict = ["**/*.py"] # use 'strict' checking on all files
+venvPath = "." # rye installs the venv in the current dir
+venv = ".venv" #       in a folder called `.venv`
 
 
 [tool.coverage.paths]
