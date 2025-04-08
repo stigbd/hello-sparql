@@ -4,8 +4,70 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
-dependencies = [
-    "httpx>=0.28.1",
-    "pandas>=2.2.3",
-    "streamlit>=1.44.1",
+dependencies = ["httpx>=0.28.1", "pandas>=2.2.3", "streamlit>=1.44.1"]
+
+
+[dependency-groups]
+dev = [
+    "deptry>=0.23.0",
+    "pandas-stubs>=2.2.3.250308",
+    "pip-audit>=2.8.0",
+    "poethepoet>=0.33.1",
+    "pyright>=1.1.398",
+    "pytest>=8.3.5",
+    "pytest-cov>=6.1.0",
+    "ruff>=0.11.3",
 ]
+
+[tool.ruff.lint]
+select = ["ALL"]
+# and then manually ignore annoying ones:
+ignore = [
+    #     "ANN401", # Any should be allowed
+    "D211",
+    "D213",
+    "COM812",
+    "D203",
+    "ISC001",
+    "PD901",  # Pandas DataFrame
+]
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = [
+    # at least this three should be fine in tests:
+    "S101",   # asserts allowed in tests...
+    "ANN401", # Any should be allowed
+    #     "ARG",  # Unused function args -> fixtures nevertheless are functionally relevant...
+    #     "FBT",  # Don't care about booleans as positional arguments in tests, e.g. via @pytest.mark.parametrize()
+]
+
+[tool.ruff.lint.isort]
+# so it knows to group first-party stuff last
+known-first-party = ["app"]
+
+
+[tool.pyright]
+venvPath = "."       # rye installs the venv in the current dir
+venv = ".venv"       #       in a folder called `.venv`
+strict = ["**/*.py"] # use 'strict' checking on all files
+
+
+[tool.coverage.paths]
+source = ["app"]
+
+[tool.coverage.run]
+branch = true
+omit = ["tests/*"]
+
+[tool.coverage.report]
+# fail_under = 100 missing tests for async paths
+fail_under = 50
+show_missing = true
+
+[tool.poe.tasks]
+format = "uv run ruff format"
+lint = "uv run ruff check --fix"
+pyright = "uv run pyright"
+check-deps = "uv run deptry ."
+audit = "uv run pip-audit"
+test = "uv run pytest --cov --cov-report=term-missing --cov-report=html"
+release = ["lint", "pyright", "check-deps", "audit", "test"]

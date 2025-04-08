@@ -16,23 +16,27 @@ class FormData(BaseModel):
     query: str
     data: str
 
+
 @app.get("/health", include_in_schema=False)
 async def health_check() -> dict[str, str]:
     """Return status ok."""
     return {"status": "OK"}
 
 
-@app.post("/sparql", responses={
+@app.post(
+    "/sparql",
+    responses={
         200: {
             "description": "Result of running the SPARQL query",
             "content": {
                 "text/plain": {},
                 "application/json": {},
                 "text/csv": {},
-                "text/xml": {}
+                "text/xml": {},
             },
         },
-    })
+    },
+)
 async def run_sparql(request: Request, data: Annotated[FormData, Form()]) -> Response:
     """Run the given SPARQL query on the provided RDF data."""
     # Determine the format of the response based on the Accept header:

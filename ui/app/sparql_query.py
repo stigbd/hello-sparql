@@ -1,14 +1,27 @@
+"""Streamlit ui module."""
+
+import os
+from http import HTTPStatus
+
 import httpx
-import streamlit as st
 import pandas as pd
+import streamlit as st
+
+SPARQL_ENDPOINT = os.getenv("SPARQL_ENDPOINT", "http://localhost:8000/sparql")
 
 
-def run_query(query, data):
+class SPARQLQueryError(Exception):
+    """SPARQL Query Exception."""
+
+
+def run_query(query: str, data: str) -> str:
+    """Run query on data."""
     # Run query on data and return result
     with httpx.Client() as client:
-        response = client.post("http://localhost:8000/sparql", data={"query": query, "data": data})
-        if response.status_code != 200:
-            raise Exception(f"Error running query: {response.json()['detail']}")
+        response = client.post(SPARQL_ENDPOINT, data={"query": query, "data": data})
+        if response.status_code != HTTPStatus.OK:
+            msg = f"Error running query: {response.json()['detail']}"
+            raise SPARQLQueryError(msg)
         return response.text
 
 
@@ -36,7 +49,9 @@ ex:Jane rdf:type ex:Person ;
         ex:age 25 .
 """
 
-def main():
+
+def main() -> None:
+    """Set up and start streamlit."""
     st.set_page_config(
         page_title="SPARQL Query Explorer",
         page_icon="sparql-40.png",
@@ -61,8 +76,8 @@ def main():
             df.columns = table[0]
             # Remove header and row with just a line:
             df = df[2:]
-            st.dataframe(data=df)
-        except Exception as e:
+            st.dataframe(data=df)  # type: ignore[reportUnknownMemberType]
+        except SPARQLQueryError as e:
             st.error(f"Error: {e}")
 
 

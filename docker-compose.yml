@@ -5,3 +5,13 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8000:8000"
+  ui:
+    build:
+      context: ./ui
+      dockerfile: Dockerfile
+    ports:
+      - "8501:8501"
+    environment:
+      - SPARQL_ENDPOINT=http://api:8000/sparql
+    depends_on:
+      - api
