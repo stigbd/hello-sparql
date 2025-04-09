@@ -50,6 +50,13 @@ ex:Jane rdf:type ex:Person ;
         ex:age 25 .
 """
 
+def result_to_dataframe(result) -> pd.DataFrame:
+    table: list[list[str]] = [line.split("|") for line in result]
+    df = pd.DataFrame(table)
+    df.columns = table[0]
+    # Remove header and row with just a line:
+    return df[2:]
+
 
 def main() -> None:
     """Set up and start streamlit."""
@@ -61,17 +68,18 @@ def main() -> None:
     )
     st.title("SPARQL Query Explorer")
 
-    right_col, left_col = st.columns(2)
+    left_col, right_col = st.columns(2)
 
     # Get query and data from user input:
-    with right_col:
+    with left_col:
         response_dict_query = code_editor(
             initial_query,
             lang="turtle",
             info={"info": [{"name": "Enter your SPARQL query here"}]},
         )
         query = response_dict_query["text"]
-    with left_col:
+
+    with right_col:
         response_dict_data = code_editor(
             initial_data,
             lang="turtle",
@@ -79,17 +87,13 @@ def main() -> None:
         )
         data = response_dict_data["text"]
 
-    if st.button("Run Query on Data"):
+    if query or data:
         try:
             result = run_query(query, data).splitlines()
-            table: list[list[str]] = [line.split("|") for line in result]
-            df = pd.DataFrame(table)
-            df.columns = table[0]
-            # Remove header and row with just a line:
-            df = df[2:]
-            st.dataframe(data=df)  # type: ignore[reportUnknownMemberType]
+            st.header("Result")
+            st.dataframe(data=result_to_dataframe(result))  # type: ignore[reportUnknownMemberType]
         except SPARQLQueryError as e:
-            st.error(f"Error: {e}")
+                st.error(f"Error: {e}")
 
 
 if __name__ == "__main__":
