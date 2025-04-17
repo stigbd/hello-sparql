@@ -26,18 +26,16 @@ def run_query(query: str, data: str) -> str:
         return response.text
 
 
-initial_query = """
-PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+initial_query = """PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 PREFIX ex: <http://example.org/>
 
 SELECT ?s ?p ?o
 WHERE {
     ?s ?p ?o .
-}
-"""
-initial_data = """
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
+}"""
+
+initial_data = """@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
 @prefix ex: <http://example.org/>.
 
@@ -48,9 +46,13 @@ ex:John rdf:type ex:Person ;
 ex:Jane rdf:type ex:Person ;
         ex:name "Jane" ;
         ex:age 25 .
-"""
 
-def result_to_dataframe(result) -> pd.DataFrame:
+ex:Kitty rdf:type ex:Cat ;
+        ex:name "Kitty" ;
+        ex:age 7 ."""
+
+def result_to_dataframe(result: str) -> pd.DataFrame:
+    """Convert result to dataframe."""
     table: list[list[str]] = [line.split("|") for line in result]
     df = pd.DataFrame(table)
     df.columns = table[0]
@@ -76,6 +78,7 @@ def main() -> None:
             initial_query,
             lang="turtle",
             info={"info": [{"name": "Enter your SPARQL query here"}]},
+            options={"showLineNumbers": True}
         )
         query = response_dict_query["text"]
 
@@ -84,6 +87,7 @@ def main() -> None:
             initial_data,
             lang="turtle",
             info={"info": [{"name": "Enter your data here"}]},
+            options={"showLineNumbers": True}
         )
         data = response_dict_data["text"]
 
