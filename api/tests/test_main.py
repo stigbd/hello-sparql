@@ -115,3 +115,14 @@ async def test_main_with_unsupported_data_format() -> None:
         )
     assert response.status_code == HTTPStatus.NOT_ACCEPTABLE, response.json()
     assert response.headers["content-type"] == "application/json"
+
+
+@pytest.mark.anyio
+async def test_health()-> None:
+    """Should return 200 OK and json body."""
+    async with AsyncClient(
+        transport=ASGITransport(app=app), base_url="http://test"
+    ) as ac:
+        response = await ac.get("/health")
+    assert response.status_code == HTTPStatus.OK, response.json()
+    assert response.headers["content-type"] == "application/json"
