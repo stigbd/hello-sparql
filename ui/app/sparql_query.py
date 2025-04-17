@@ -26,11 +26,21 @@ def run_query(query: str, data: str) -> str:
         return response.text
 
 
-initial_query = """PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+basic_query = """PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 PREFIX ex: <http://example.org/>
 
 SELECT ?s ?p ?o
+WHERE {
+    ?s ?p ?o .
+}"""
+
+
+count_query = """PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX ex: <http://example.org/>
+
+SELECT (COUNT(*) AS ?count)
 WHERE {
     ?s ?p ?o .
 }"""
@@ -51,6 +61,7 @@ ex:Kitty rdf:type ex:Cat ;
         ex:name "Kitty" ;
         ex:age 7 ."""
 
+
 def result_to_dataframe(result: str) -> pd.DataFrame:
     """Convert result to dataframe."""
     table: list[list[str]] = [line.split("|") for line in result]
@@ -62,6 +73,9 @@ def result_to_dataframe(result: str) -> pd.DataFrame:
 
 def main() -> None:
     """Set up and start streamlit."""
+    query = basic_query
+    data = initial_data
+
     st.set_page_config(
         page_title="SPARQL Query Explorer",
         page_icon="sparql-40.png",
@@ -70,26 +84,33 @@ def main() -> None:
     )
     st.title("SPARQL Query Explorer")
 
+    with st.sidebar:
+        query_type = st.radio("Choose a sparql query type", ("Basic", "Count"))
+        if query_type == "Basic":
+            query = basic_query
+        elif query_type == "Count":
+            query = count_query
+
     left_col, right_col = st.columns(2)
 
     # Get query and data from user input:
     with left_col:
         response_dict_query = code_editor(
-            initial_query,
+            query,
             lang="turtle",
             info={"info": [{"name": "Enter your SPARQL query here"}]},
-            options={"showLineNumbers": True}
+            options={"showLineNumbers": True},
         )
-        query = response_dict_query["text"]
+        query = response_dict_query["text"] if response_dict_query["text"] else query
 
     with right_col:
         response_dict_data = code_editor(
-            initial_data,
+            data,
             lang="turtle",
             info={"info": [{"name": "Enter your data here"}]},
-            options={"showLineNumbers": True}
+            options={"showLineNumbers": True},
         )
-        data = response_dict_data["text"]
+        data = response_dict_data["text"] if response_dict_data["text"] else data
 
     if query or data:
         try:
@@ -97,7 +118,7 @@ def main() -> None:
             st.header("Result")
             st.dataframe(data=result_to_dataframe(result))  # type: ignore[reportUnknownMemberType]
         except SPARQLQueryError as e:
-                st.error(f"Error: {e}")
+            st.error(f"Error: {e}")
 
 
 if __name__ == "__main__":
