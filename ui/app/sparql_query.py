@@ -26,7 +26,7 @@ def run_query(query: str, data: str) -> str:
         return response.text
 
 
-basic_query = """PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+basic_select_query = """PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 PREFIX ex: <http://example.org/>
 
@@ -35,6 +35,15 @@ WHERE {
     ?s ?p ?o .
 }"""
 
+basic_construct_query = """PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX ex: <http://example.org/>
+
+CONSTRUCT {
+    ?s ?p ?o .
+} WHERE {
+    ?s ?p ?o .
+}"""
 
 count_query = """PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
@@ -73,7 +82,7 @@ def result_to_dataframe(result: str) -> pd.DataFrame:
 
 def main() -> None:
     """Set up and start streamlit."""
-    query = basic_query
+    query = basic_select_query
     data = initial_data
 
     st.set_page_config(
@@ -85,11 +94,15 @@ def main() -> None:
     st.title("SPARQL Query Explorer")
 
     with st.sidebar:
-        query_type = st.radio("Choose a sparql query type", ("Basic", "Count"))
+        query_type = st.radio(
+            "Choose a sparql query type", ("Basic select", "Count", "Basic construct")
+        )
         if query_type == "Basic":
-            query = basic_query
+            query = basic_select_query
         elif query_type == "Count":
             query = count_query
+        elif query_type == "Basic construct":
+            query = basic_construct_query
 
     left_col, right_col = st.columns(2)
 
