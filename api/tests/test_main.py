@@ -118,7 +118,7 @@ async def test_main_with_unsupported_data_format() -> None:
 
 
 @pytest.mark.anyio
-async def test_health()-> None:
+async def test_health() -> None:
     """Should return 200 OK and json body."""
     async with AsyncClient(
         transport=ASGITransport(app=app), base_url="http://test"
@@ -126,3 +126,37 @@ async def test_health()-> None:
         response = await ac.get("/health")
     assert response.status_code == HTTPStatus.OK, response.json()
     assert response.headers["content-type"] == "application/json"
+
+
+@pytest.mark.anyio
+@pytest.mark.parametrize(
+    "headers",
+    [
+        {"Accept": "text/plain"},
+        {"Accept": "application/json"},
+        {"Accept": "text/csv"},
+        {"Accept": "text/xml"},
+    ],
+)
+async def test_main_with_valid_data_and_construct_query(
+    headers: dict[str, str],
+) -> None:
+    """Should return 501 Not Implemented."""
+    query = "CONSTRUCT {?s ?p ?o .} WHERE {?s ?p ?o .}"
+    data = """
+    @prefix ex: <http://example.org/> .
+    @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+    @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+    ex:Alice
+	a ex:Person ;
+	ex:ssn "987-65-432A" .
+	"""
+
+    async with AsyncClient(
+        transport=ASGITransport(app=app), base_url="http://test"
+    ) as ac:
+        response = await ac.post(
+            "/sparql", headers=headers, data={"query": query, "data": data}
+        )
+    assert response.status_code == HTTPStatus.NOT_IMPLEMENTED, response.json()

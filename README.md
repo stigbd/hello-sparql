@@ -6,7 +6,7 @@ Consists of a simple api that runs the SPARQL queries and a very simple ui that 
 
 ## Usage
 
-The simplest way to run the api and the ui is to use docker-compose:
+The simplest way to run the api and the ui is to use docker compose:
 
 ```zsh
 % docker compose up --build

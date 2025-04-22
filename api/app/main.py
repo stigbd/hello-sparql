@@ -5,6 +5,7 @@ from typing import Annotated
 import rdflib
 from fastapi import FastAPI, Form, HTTPException, Request, Response
 from pydantic import BaseModel
+from rdflib.exceptions import ParserError
 from rdflib.plugins.sparql import prepareQuery
 
 app = FastAPI()
@@ -46,7 +47,7 @@ async def run_sparql(request: Request, data: Annotated[FormData, Form()]) -> Res
     g = rdflib.Graph()
     try:
         g.parse(data=data.data)
-    except Exception as e:
+    except ParserError as e:
         msg = "Invalid RDF data: " + str(e)
         raise HTTPException(status_code=400, detail=msg) from e
 
@@ -64,9 +65,14 @@ async def run_sparql(request: Request, data: Annotated[FormData, Form()]) -> Res
         msg = "Error running SPARQL query: " + str(e)
         raise HTTPException(status_code=400, detail=msg) from e
 
+    if qres.type == "CONSTRUCT":  # pragma: no cover
+        msg = "Construct queries are not supported"
+        raise HTTPException(status_code=501, detail=msg)
+
     try:
+        content = qres.serialize(format=serialization_format)  # type: ignore[reportUnknownMemberType]
         return Response(
-            content=qres.serialize(format=serialization_format),  # type: ignore[reportUnknownMemberType]
+            content=content,
             media_type=media_type,
         )
     except Exception as e:  # pragma: no cover
