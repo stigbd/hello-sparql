@@ -6,8 +6,8 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "httpx>=0.28.1",
-    "pandas>=2.2.3",
-    "streamlit>=1.44.1",
+    "pandas>=2.3.3",
+    "streamlit>=1.50.0",
     "streamlit-code-editor>=0.1.22",
 ]
 
@@ -18,10 +18,10 @@ dev = [
     "pandas-stubs>=2.2.3.250308",
     "pip-audit>=2.8.0",
     "poethepoet>=0.33.1",
-    "pyright>=1.1.398",
     "pytest>=8.3.5",
     "pytest-cov>=6.1.0",
     "ruff>=0.11.3",
+    "ty>=0.0.1a23",
 ]
 
 [tool.ruff.lint]
@@ -34,7 +34,6 @@ ignore = [
     "COM812",
     "D203",
     "ISC001",
-    "PD901",  # Pandas DataFrame
 ]
 [tool.ruff.lint.per-file-ignores]
 "tests/**/*.py" = [
@@ -48,12 +47,6 @@ ignore = [
 [tool.ruff.lint.isort]
 # so it knows to group first-party stuff last
 known-first-party = ["app"]
-
-
-[tool.pyright]
-venvPath = "." # rye installs the venv in the current dir
-venv = ".venv" #       in a folder called `.venv`
-
 
 [tool.coverage.paths]
 source = ["app"]
@@ -70,8 +63,8 @@ show_missing = true
 [tool.poe.tasks]
 format = "uv run ruff format"
 lint = "uv run ruff check --fix"
-pyright = "uv run pyright"
+check-types = "uv run ty check ."
 check-deps = "uv run deptry ."
-audit = "uv run pip-audit"
+audit = "uv run pip-audit ."
 test = "uv run pytest --cov --cov-report=term-missing --cov-report=html"
-release = ["lint", "pyright", "check-deps", "audit", "test"]
+release = ["lint", "check-types", "check-deps", "audit", "test"]

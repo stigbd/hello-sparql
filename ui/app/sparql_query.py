@@ -1,6 +1,8 @@
 """Streamlit ui module."""
 
+import logging
 import os
+from datetime import UTC, datetime
 from http import HTTPStatus
 
 import httpx
@@ -9,6 +11,9 @@ import streamlit as st
 from code_editor import code_editor
 
 SPARQL_ENDPOINT = os.getenv("SPARQL_ENDPOINT", "http://localhost:8000/sparql")
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
 
 
 class SPARQLQueryError(Exception):
@@ -19,7 +24,9 @@ def run_query(query: str, data: str) -> str:
     """Run query on data."""
     # Run query on data and return result
     with httpx.Client() as client:
-        response = client.post(SPARQL_ENDPOINT, data={"query": query, "data": data})
+        response = client.post(
+            SPARQL_ENDPOINT, data={"query": query, "data": data}, timeout=60.0
+        )
         if response.status_code != HTTPStatus.OK:
             msg = f"Error running query: {response.json()['detail']}"
             raise SPARQLQueryError(msg)
@@ -71,13 +78,13 @@ ex:Kitty rdf:type ex:Cat ;
         ex:age 7 ."""
 
 
-def result_to_dataframe(result: str) -> pd.DataFrame:
+def result_to_dataframe(result: list[str]) -> pd.DataFrame:
     """Convert result to dataframe."""
     table: list[list[str]] = [line.split("|") for line in result]
     df = pd.DataFrame(table)
     df.columns = table[0]
     # Remove header and row with just a line:
-    return df[2:]
+    return df.drop([0, 1])
 
 
 def main() -> None:
@@ -120,16 +127,22 @@ def main() -> None:
         response_dict_data = code_editor(
             data,
             lang="turtle",
-            info={"info": [{"name": "Enter your data here"}]},
+            info={"info": [{"name": "Enter your data here, followed by <CTRL+ENTER>"}]},
             options={"showLineNumbers": True},
         )
+        logger.info("Got data from code editor.")
         data = response_dict_data["text"] if response_dict_data["text"] else data
 
     if query or data:
         try:
-            result = run_query(query, data).splitlines()
+            start_time = datetime.now(tz=UTC)
+            logger.info("Running query...")
+            result: list[str] = run_query(query, data).splitlines()
+            end_time = datetime.now(tz=UTC)
+            duration = (end_time - start_time).total_seconds()
+            logger.info("Query ran in %f seconds.", duration)
             st.header("Result")
-            st.dataframe(data=result_to_dataframe(result))  # type: ignore[reportUnknownMemberType]
+            st.dataframe(data=result_to_dataframe(result))
         except SPARQLQueryError as e:
             st.error(f"Error: {e}")
 
