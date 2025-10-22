@@ -3,7 +3,7 @@ name = "hello-sparql"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.14"
 dependencies = [
     "fastapi[standard]>=0.115.12",
     "pydantic>=2.11.2",
@@ -15,10 +15,10 @@ dev = [
     "deptry>=0.23.0",
     "pip-audit>=2.8.0",
     "poethepoet>=0.33.1",
-    "pyright>=1.1.398",
     "pytest>=8.3.5",
     "pytest-cov>=6.1.0",
     "ruff>=0.11.3",
+    "ty>=0.0.1a23",
 ]
 
 [tool.ruff.lint]
@@ -67,8 +67,8 @@ show_missing = true
 [tool.poe.tasks]
 format = "uv run ruff format"
 lint = "uv run ruff check --fix"
-pyright = "uv run pyright"
+check-types = "uv run ty check ."
 check-deps = "uv run deptry ."
-audit = "uv run pip-audit"
+audit = "uv run pip-audit ."
 test = "uv run pytest -s --cov --cov-report=term-missing --cov-report=html"
-release = ["lint", "pyright", "check-deps", "audit", "test"]
+release = ["lint", "check-types", "check-deps", "audit", "test"]
