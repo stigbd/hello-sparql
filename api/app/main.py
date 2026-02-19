@@ -4,11 +4,28 @@ from typing import Annotated
 
 import rdflib
 from fastapi import FastAPI, Form, HTTPException, Request, Response
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from rdflib.exceptions import ParserError
 from rdflib.plugins.sparql import prepareQuery
 
 app = FastAPI()
+
+origins = [
+    "http://localhost.tiangolo.com",
+    "https://localhost.tiangolo.com",
+    "http://localhost",
+    "http://localhost:8080",
+    "http://localhost:3000",
+]
+# Configure CORS
+app.add_middleware(
+    CORSMiddleware,  # type: ignore[invalid-argument-type]
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 class FormData(BaseModel):
