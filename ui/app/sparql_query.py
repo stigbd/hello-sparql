@@ -121,7 +121,7 @@ def main() -> None:
             info={"info": [{"name": "Enter your SPARQL query here"}]},
             options={"showLineNumbers": True},
         )
-        query = response_dict_query["text"] if response_dict_query["text"] else query
+        query = response_dict_query["text"] or query
 
     with right_col:
         response_dict_data = code_editor(
@@ -131,7 +131,7 @@ def main() -> None:
             options={"showLineNumbers": True},
         )
         logger.info("Got data from code editor.")
-        data = response_dict_data["text"] if response_dict_data["text"] else data
+        data = response_dict_data["text"] or data
 
     if query or data:
         try:

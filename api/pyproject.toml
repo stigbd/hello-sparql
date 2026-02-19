@@ -21,6 +21,9 @@ dev = [
     "ty>=0.0.1a23",
 ]
 
+[tool.uv]
+required-version = "0.10.4"
+
 [tool.ruff.lint]
 select = ["ALL"]
 # and then manually ignore annoying ones:
@@ -44,13 +47,6 @@ ignore = [
 [tool.ruff.lint.isort]
 # so it knows to group first-party stuff last
 known-first-party = ["app"]
-
-
-[tool.pyright]
-venvPath = "."       # rye installs the venv in the current dir
-venv = ".venv"       #       in a folder called `.venv`
-strict = ["**/*.py"] # use 'strict' checking on all files
-
 
 [tool.coverage.paths]
 source = ["app"]

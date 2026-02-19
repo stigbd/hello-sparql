@@ -24,6 +24,9 @@ dev = [
     "ty>=0.0.1a23",
 ]
 
+[tool.uv]
+required-version = "0.10.4"
+
 [tool.ruff.lint]
 select = ["ALL"]
 # and then manually ignore annoying ones:

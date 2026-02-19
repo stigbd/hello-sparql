@@ -38,7 +38,9 @@ async def health_check() -> dict[str, str]:
         },
     },
 )
-async def run_sparql(request: Request, data: Annotated[FormData, Form()]) -> Response:
+async def run_sparql(
+    request: Request, form_data: Annotated[FormData, Form()]
+) -> Response:
     """Run the given SPARQL query on the provided RDF data."""
     # Determine the format of the response based on the Accept header:
     serialization_format, media_type = await get_format_and_media_type(request)
@@ -46,14 +48,14 @@ async def run_sparql(request: Request, data: Annotated[FormData, Form()]) -> Res
     # Parse the RDF data into a graph:
     g = rdflib.Graph()
     try:
-        g.parse(data=data.data)
+        g.parse(data=form_data.data)
     except ParserError as e:
         msg = "Invalid RDF data: " + str(e)
         raise HTTPException(status_code=400, detail=msg) from e
 
     # Parse the SPARQL query into a query object:
     try:
-        q = prepareQuery(data.query)
+        q = prepareQuery(form_data.query)
     except Exception as e:
         msg = "Invalid SPARQL query: " + str(e)
         raise HTTPException(status_code=400, detail=msg) from e
@@ -70,7 +72,7 @@ async def run_sparql(request: Request, data: Annotated[FormData, Form()]) -> Res
         raise HTTPException(status_code=501, detail=msg)
 
     try:
-        content = qres.serialize(format=serialization_format)  # type: ignore[reportUnknownMemberType]
+        content = qres.serialize(format=serialization_format)
         return Response(
             content=content,
             media_type=media_type,
