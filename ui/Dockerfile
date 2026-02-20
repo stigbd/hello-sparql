@@ -1,20 +1,76 @@
-FROM python:3.14-slim
+# Build stage
+FROM node:20-alpine AS builder
 
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    && rm -rf /var/lib/apt/lists/*
-# Install uv.
-COPY --from=ghcr.io/astral-sh/uv:0.10.4 /uv /uvx /bin/
+# Install pnpm
+RUN corepack enable && corepack prepare pnpm@8.15.0 --activate
 
-# Copy the application into the container.
-ADD . /app
-
-# Install the application dependencies.
+# Set working directory
 WORKDIR /app
-RUN uv sync --frozen
 
-# Expose the application port.
-EXPOSE 8501
+# Copy package files
+COPY package.json pnpm-workspace.yaml ./
+COPY apps/web/package.json ./apps/web/
+COPY packages/types/package.json ./packages/types/
+COPY packages/api-client/package.json ./packages/api-client/
+COPY packages/ui/package.json ./packages/ui/
 
-# Run the application.
-CMD ["/app/.venv/bin/streamlit", "run",  "app/sparql_query.py"]
+# Copy pnpm lockfileif it exists
+COPY pnpm-lock.yaml ./
+
+# Install dependencies
+RUN pnpm install --frozen-lockfile
+
+# Copy source code
+COPY . .
+
+# Build the application
+WORKDIR /app/apps/web
+RUN pnpm build
+
+# Production stage
+FROM nginx:alpine
+
+# Copy custom nginx config
+RUN echo 'server { \
+    listen 3000; \
+    server_name _; \
+    root /usr/share/nginx/html; \
+    index index.html; \
+    \
+    gzip on; \
+    gzip_vary on; \
+    gzip_min_length 1024; \
+    gzip_types text/plain text/css text/xml text/javascript application/javascript application/xml+rss application/json; \
+    \
+    add_header X-Frame-Options "SAMEORIGIN" always; \
+    add_header X-Content-Type-Options "nosniff" always; \
+    add_header X-XSS-Protection "1; mode=block" always; \
+    \
+    location / { \
+    try_files $uri $uri/ /index.html; \
+    } \
+    \
+    location /api/ { \
+    proxy_pass http://api:8000/; \
+    proxy_http_version 1.1; \
+    proxy_set_header Upgrade $http_upgrade; \
+    proxy_set_header Connection "upgrade"; \
+    proxy_set_header Host $host; \
+    proxy_cache_bypass $http_upgrade; \
+    } \
+    \
+    location /health { \
+    access_log off; \
+    return 200 "healthy\n"; \
+    add_header Content-Type text/plain; \
+    } \
+    }' > /etc/nginx/conf.d/default.conf
+
+# Copy built assets from builder
+COPY --from=builder /app/apps/web/dist /usr/share/nginx/html
+
+# Expose port
+EXPOSE 3000
+
+# Start nginx
+CMD ["nginx", "-g", "daemon off;"]
