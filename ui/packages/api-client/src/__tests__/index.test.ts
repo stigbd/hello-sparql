@@ -32,7 +32,7 @@ describe('SPARQLClient', () => {
 
   beforeEach(() => {
     mockFetch = vi.fn();
-    global.fetch = mockFetch as any;
+    global.fetch = mockFetch as typeof global.fetch;
     vi.useFakeTimers();
   });
 

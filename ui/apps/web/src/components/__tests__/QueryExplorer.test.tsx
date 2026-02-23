@@ -37,7 +37,7 @@ describe('QueryExplorer', () => {
       reset: vi.fn(),
     }));
 
-    (useSPARQLQueryModule.useSPARQLQuery as any) = mockUseSPARQLQuery;
+    (useSPARQLQueryModule.useSPARQLQuery as unknown) = mockUseSPARQLQuery;
   });
 
   it('renders without crashing', () => {

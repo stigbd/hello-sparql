@@ -27,7 +27,7 @@ global.performance = {
     mockTime += 100;
     return mockTime;
   }),
-} as any;
+} as Performance;
 
 // Mock FormData if not available
 if (typeof FormData === 'undefined') {
@@ -67,13 +67,13 @@ if (typeof FormData === 'undefined') {
     }
   }
 
-  global.FormData = FormDataMock as any;
+  global.FormData = FormDataMock as typeof FormData;
 }
 
 // Suppress console errors in tests (optional)
 const originalError = console.error;
 beforeAll(() => {
-  console.error = (...args: any[]) => {
+  console.error = (...args: unknown[]) => {
     if (
       typeof args[0] === 'string' &&
       (args[0].includes('Warning: ReactDOM.render') ||
