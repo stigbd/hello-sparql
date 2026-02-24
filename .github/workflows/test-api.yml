@@ -22,7 +22,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install uv
-        uses: astral-sh/setup-uv@v3
+        uses: astral-sh/setup-uv@v7
+        with:
+          working-directory: "./api"
 
       - name: "Set up Python"
         uses: actions/setup-python@v5
@@ -30,7 +32,7 @@ jobs:
           python-version-file: "./api/.python-version"
 
       - name: Install the project
-        run: uv sync --all-extras --dev
+        run: uv sync --locked --all-extras --dev
 
       - name: Run linters, checks and tests
         run: |
