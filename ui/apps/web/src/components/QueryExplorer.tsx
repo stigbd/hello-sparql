@@ -271,7 +271,7 @@ export const QueryExplorer: React.FC = () => {
 
       <div className="header">
         <h1>
-          <span>📊</span>
+          <span><img src="sparql-40.png" alt="Icon" /></span>
           SPARQL Query Explorer
         </h1>
         <p>Execute SPARQL queries on RDF data and explore the results</p>
