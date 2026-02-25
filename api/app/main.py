@@ -6,14 +6,13 @@ import rdflib
 from fastapi import FastAPI, Form, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from pyshacl import validate
 from rdflib.exceptions import ParserError
 from rdflib.plugins.sparql import prepareQuery
 
 app = FastAPI()
 
 origins = [
-    "http://localhost.tiangolo.com",
-    "https://localhost.tiangolo.com",
     "http://localhost",
     "http://localhost:8080",
     "http://localhost:3000",
@@ -28,11 +27,18 @@ app.add_middleware(
 )
 
 
-class FormData(BaseModel):
+class SPARQLFormData(BaseModel):
     """Form data for running a SPARQL query on RDF data."""
 
-    query: str
     data: str
+    query: str
+
+
+class SHACLFormData(BaseModel):
+    """Form data for running a SHACL validation on RDF data."""
+
+    data: str
+    shapes: str
 
 
 @app.get("/health", include_in_schema=False)
@@ -56,7 +62,7 @@ async def health_check() -> dict[str, str]:
     },
 )
 async def run_sparql(
-    request: Request, form_data: Annotated[FormData, Form()]
+    request: Request, form_data: Annotated[SPARQLFormData, Form()]
 ) -> Response:
     """Run the given SPARQL query on the provided RDF data."""
     # Determine the format of the response based on the Accept header:
@@ -88,8 +94,60 @@ async def run_sparql(
         msg = "Construct queries are not supported"
         raise HTTPException(status_code=501, detail=msg)
 
+    # Serialize the result:
     try:
         content = qres.serialize(format=serialization_format)
+        return Response(
+            content=content,
+            media_type=media_type,
+        )
+    except Exception as e:  # pragma: no cover
+        msg = "Error serializing query results: " + str(e)
+        raise HTTPException(status_code=400, detail=msg) from e
+
+
+@app.post(
+    "/shacl",
+    responses={
+        200: {
+            "description": "Result of running the SHACL validation",
+            "content": {
+                "text/plain": {},
+                "application/json": {},
+                "text/csv": {},
+                "text/xml": {},
+            },
+        },
+    },
+)
+async def run_shacl(
+    request: Request, form_data: Annotated[SHACLFormData, Form()]
+) -> Response:
+    """Run the given SHACL validation on the provided RDF data."""
+    # Determine the format of the response based on the Accept header:
+    serialization_format, media_type = await get_format_and_media_type(request)
+
+    # Parse the RDF data into a graph:
+    data_graph = rdflib.Graph()
+    try:
+        data_graph.parse(data=form_data.data)
+    except ParserError as e:
+        msg = "Invalid RDF data: " + str(e)
+        raise HTTPException(status_code=400, detail=msg) from e
+
+    # Parse the SHACL shapes into a graph:
+    shapes_graph = rdflib.Graph()
+    try:
+        shapes_graph.parse(data=form_data.shapes)
+    except ParserError as e:
+        msg = "Invalid SHACL shapes: " + str(e)
+        raise HTTPException(status_code=400, detail=msg) from e
+
+    # Validate the
+    _, results_graph, _ = validate(data_graph=data_graph, shacl_graph=shapes_graph)
+    # Serialize the result:
+    try:
+        content = results_graph.serialize(format=serialization_format)
         return Response(
             content=content,
             media_type=media_type,
@@ -119,6 +177,9 @@ async def get_format_and_media_type(request: Request) -> tuple[str, str]:
     elif request.headers.get("Accept") == "text/plain":
         serialization_format = "txt"
         media_type = "text/plain"
+    elif request.headers.get("Accept") == "text/turtle":
+        serialization_format = "turtle"
+        media_type = "text/turtle"
     else:
         msg = (
             "Unsupported media type in accept header: %s",
