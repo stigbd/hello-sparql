@@ -23,17 +23,17 @@ Example usage with curl:
 
 A SPARQL query and dataset are provided in the `example-files` directory. You can use the following command to run the query against the dataset:
 ```zsh
-% curl -i http://localhost:8000/sparql \
---data-urlencode "data=`cat example-files/data.ttl`" \
---data-urlencode "query=`cat example-files/query.rq`"
-```
+curl -i http://localhost:8000/sparql \
+-H "Content-Type: application/json" \
+-d "$(jq -n --arg data "$(cat example-files/data.ttl)" --arg query "$(cat example-files/query.rq)" '{"data": $data, "query": $query}')"
+ ```
 
 A SHACL validation example is also provided in the `example-files` directory. You can use the following command to run the validation against the dataset:
 ```zsh
-% curl -i http://localhost:8000/shacl \
---data-urlencode "data=`cat example-files/data.ttl`" \
---data-urlencode "shapes=`cat example-files/shapes.ttl`" \
---header "Accept: text/turtle"
+curl -i http://localhost:8000/shacl \
+-H "Content-Type: application/json" \
+-d "$(jq -n --arg data "$(cat example-files/data.ttl)" --arg shapes "$(cat example-files/shapes.ttl)" '{"data": $data, "shapes": $shapes}')" \
+-H "Accept: text/turtle"
 ```
 
 ## Documentation

@@ -9,6 +9,7 @@
     ".": "./src/index.ts"
   },
   "scripts": {
+    "build": "tsc",
     "type-check": "tsc --noEmit",
     "lint": "biome lint src",
     "lint:fix": "biome lint --write src",

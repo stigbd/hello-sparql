@@ -34,16 +34,16 @@ export class SPARQLClient {
     const timeoutId = setTimeout(() => controller.abort(), this.timeout);
 
     try {
-      const formData = new FormData();
-      formData.append('query', request.query);
-      formData.append('data', request.data);
-
       const acceptHeader = this.getAcceptHeader(format);
 
       const response = await fetch(`${this.baseURL}/sparql`, {
         method: 'POST',
-        body: formData,
+        body: JSON.stringify({
+          query: request.query,
+          data: request.data,
+        }),
         headers: {
+          'Content-Type': 'application/json',
           Accept: acceptHeader,
         },
         signal: controller.signal,

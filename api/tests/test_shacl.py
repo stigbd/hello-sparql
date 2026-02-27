@@ -57,7 +57,7 @@ async def test_shacl_with_valid_data_and_shapes() -> None:
         transport=ASGITransport(app=app), base_url="http://test"
     ) as ac:
         response = await ac.post(
-            "/shacl", headers=headers, data={"shapes": shapes, "data": data}
+            "/shacl", headers=headers, json={"shapes": shapes, "data": data}
         )
     assert response.status_code == HTTPStatus.OK, response.json()
     assert headers["Accept"] in response.headers["content-type"]
@@ -104,7 +104,7 @@ async def test_shacl_with_invalid_data_and_valid_shapes() -> None:
         transport=ASGITransport(app=app), base_url="http://test"
     ) as ac:
         response = await ac.post(
-            "/shacl", headers=headers, data={"shapes": shapes, "data": invalid_data}
+            "/shacl", headers=headers, json={"shapes": shapes, "data": invalid_data}
         )
     assert response.status_code == HTTPStatus.BAD_REQUEST, response.json()
 
@@ -136,6 +136,6 @@ async def test_shacl_with_valid_data_and_invalid_shapes() -> None:
         transport=ASGITransport(app=app), base_url="http://test"
     ) as ac:
         response = await ac.post(
-            "/shacl", headers=headers, data={"shapes": shapes, "data": data}
+            "/shacl", headers=headers, json={"shapes": shapes, "data": data}
         )
     assert response.status_code == HTTPStatus.BAD_REQUEST, response.json()
