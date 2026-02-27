@@ -29,47 +29,6 @@ global.performance = {
   }),
 } as Performance;
 
-// Mock FormData if not available
-if (typeof FormData === 'undefined') {
-  class FormDataMock {
-    private data: Map<string, string | Blob>;
-
-    constructor() {
-      this.data = new Map();
-    }
-
-    append(key: string, value: string | Blob): void {
-      this.data.set(key, value);
-    }
-
-    get(key: string): string | Blob | null {
-      return this.data.get(key) || null;
-    }
-
-    has(key: string): boolean {
-      return this.data.has(key);
-    }
-
-    delete(key: string): void {
-      this.data.delete(key);
-    }
-
-    entries() {
-      return this.data.entries();
-    }
-
-    keys() {
-      return this.data.keys();
-    }
-
-    values() {
-      return this.data.values();
-    }
-  }
-
-  global.FormData = FormDataMock as typeof FormData;
-}
-
 // Suppress console errors in tests (optional)
 const originalError = console.error;
 beforeAll(() => {

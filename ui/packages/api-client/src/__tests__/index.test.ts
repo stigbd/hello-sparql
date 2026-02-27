@@ -86,6 +86,7 @@ describe('SPARQLClient', () => {
         expect.objectContaining({
           method: 'POST',
           headers: {
+            'Content-Type': 'application/json',
             Accept: 'text/plain',
           },
         })
@@ -112,6 +113,7 @@ describe('SPARQLClient', () => {
         'http://localhost:8000/sparql',
         expect.objectContaining({
           headers: {
+            'Content-Type': 'application/json',
             Accept: 'application/json',
           },
         })
@@ -138,6 +140,7 @@ describe('SPARQLClient', () => {
         'http://localhost:8000/sparql',
         expect.objectContaining({
           headers: {
+            'Content-Type': 'application/json',
             Accept: 'text/csv',
           },
         })
@@ -164,13 +167,14 @@ describe('SPARQLClient', () => {
         'http://localhost:8000/sparql',
         expect.objectContaining({
           headers: {
+            'Content-Type': 'application/json',
             Accept: 'text/xml',
           },
         })
       );
     });
 
-    it('sends query and data in FormData', async () => {
+    it('sends query and data as JSON', async () => {
       mockFetch.mockResolvedValue({
         ok: true,
         text: () => Promise.resolve('results'),
@@ -182,7 +186,13 @@ describe('SPARQLClient', () => {
       });
 
       const callArgs = mockFetch.mock.calls[0][1];
-      expect(callArgs.body).toBeInstanceOf(FormData);
+      expect(callArgs.body).toBe(
+        JSON.stringify({
+          query: 'SELECT * WHERE { ?s ?p ?o }',
+          data: '@prefix ex: <http://example.org/>.',
+        })
+      );
+      expect(callArgs.headers['Content-Type']).toBe('application/json');
     });
 
     it('throws SPARQLAPIError on HTTP error with JSON response', async () => {

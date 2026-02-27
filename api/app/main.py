@@ -1,9 +1,9 @@
 """API for running SPARQL queries on RDF data."""
 
-from typing import Annotated
+from http import HTTPStatus
 
 import rdflib
-from fastapi import FastAPI, Form, HTTPException, Request, Response
+from fastapi import Depends, FastAPI, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from pyshacl import validate
@@ -27,15 +27,15 @@ app.add_middleware(
 )
 
 
-class SPARQLFormData(BaseModel):
-    """Form data for running a SPARQL query on RDF data."""
+class SPARQLRequest(BaseModel):
+    """Request model for running a SPARQL query on RDF data."""
 
     data: str
     query: str
 
 
-class SHACLFormData(BaseModel):
-    """Form data for running a SHACL validation on RDF data."""
+class SHACLRequest(BaseModel):
+    """Request model for running a SHACL validation on RDF data."""
 
     data: str
     shapes: str
@@ -47,8 +47,19 @@ async def health_check() -> dict[str, str]:
     return {"status": "OK"}
 
 
+async def check_content_type(request: Request) -> None:
+    """Check that the content type of the request is application/json."""
+    content_type = request.headers.get("content-type", None)
+    if not content_type or "application/json" not in content_type:
+        raise HTTPException(
+            status_code=HTTPStatus.UNSUPPORTED_MEDIA_TYPE,
+            detail=f"Unsupported media type {content_type}",
+        )
+
+
 @app.post(
     "/sparql",
+    dependencies=[Depends(check_content_type)],
     responses={
         200: {
             "description": "Result of running the SPARQL query",
@@ -61,24 +72,21 @@ async def health_check() -> dict[str, str]:
         },
     },
 )
-async def run_sparql(
-    request: Request, form_data: Annotated[SPARQLFormData, Form()]
-) -> Response:
+async def run_sparql(request: Request, sparql_request: SPARQLRequest) -> Response:
     """Run the given SPARQL query on the provided RDF data."""
     # Determine the format of the response based on the Accept header:
     serialization_format, media_type = await get_format_and_media_type(request)
-
     # Parse the RDF data into a graph:
     g = rdflib.Graph()
     try:
-        g.parse(data=form_data.data)
+        g.parse(data=sparql_request.data)
     except ParserError as e:
         msg = "Invalid RDF data: " + str(e)
         raise HTTPException(status_code=400, detail=msg) from e
 
     # Parse the SPARQL query into a query object:
     try:
-        q = prepareQuery(form_data.query)
+        q = prepareQuery(sparql_request.query)
     except Exception as e:
         msg = "Invalid SPARQL query: " + str(e)
         raise HTTPException(status_code=400, detail=msg) from e
@@ -108,6 +116,7 @@ async def run_sparql(
 
 @app.post(
     "/shacl",
+    dependencies=[Depends(check_content_type)],
     responses={
         200: {
             "description": "Result of running the SHACL validation",
@@ -120,9 +129,7 @@ async def run_sparql(
         },
     },
 )
-async def run_shacl(
-    request: Request, form_data: Annotated[SHACLFormData, Form()]
-) -> Response:
+async def run_shacl(request: Request, shacl_request: SHACLRequest) -> Response:
     """Run the given SHACL validation on the provided RDF data."""
     # Determine the format of the response based on the Accept header:
     serialization_format, media_type = await get_format_and_media_type(request)
@@ -130,7 +137,7 @@ async def run_shacl(
     # Parse the RDF data into a graph:
     data_graph = rdflib.Graph()
     try:
-        data_graph.parse(data=form_data.data)
+        data_graph.parse(data=shacl_request.data)
     except ParserError as e:
         msg = "Invalid RDF data: " + str(e)
         raise HTTPException(status_code=400, detail=msg) from e
@@ -138,7 +145,7 @@ async def run_shacl(
     # Parse the SHACL shapes into a graph:
     shapes_graph = rdflib.Graph()
     try:
-        shapes_graph.parse(data=form_data.shapes)
+        shapes_graph.parse(data=shacl_request.shapes)
     except ParserError as e:
         msg = "Invalid SHACL shapes: " + str(e)
         raise HTTPException(status_code=400, detail=msg) from e
