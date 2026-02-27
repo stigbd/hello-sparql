@@ -41,6 +41,7 @@ export class SPARQLClient {
         body: JSON.stringify({
           query: request.query,
           data: request.data,
+          inference: request.inference ?? false,
         }),
         headers: {
           'Content-Type': 'application/json',

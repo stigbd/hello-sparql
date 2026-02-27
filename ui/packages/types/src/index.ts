@@ -1,6 +1,7 @@
 export interface SPARQLQueryRequest {
   query: string;
   data: string;
+  inference?: boolean;
 }
 
 export interface SPARQLQueryResponse {

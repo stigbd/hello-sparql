@@ -9,6 +9,7 @@ export const QueryExplorer: React.FC = () => {
   const [query, setQuery] = useState<string>(DEFAULT_QUERY);
   const [data, setData] = useState<string>(INITIAL_DATA);
   const [selectedFormat, setSelectedFormat] = useState<SerializationFormat>('txt');
+  const [inference, setInference] = useState<boolean>(false);
   const [result, setResult] = useState<string>('');
   const [duration, setDuration] = useState<number>(0);
   const [errorMessage, setErrorMessage] = useState<string>('');
@@ -32,7 +33,7 @@ export const QueryExplorer: React.FC = () => {
     }
 
     executeQuery({
-      request: { query, data },
+      request: { query, data, inference },
       format: selectedFormat,
     });
   };
@@ -107,6 +108,16 @@ export const QueryExplorer: React.FC = () => {
           font-weight: 600;
           color: #475569;
           font-size: 14px;
+          cursor: pointer;
+          user-select: none;
+        }
+
+        .control-group input[type="checkbox"] {
+          width: 18px;
+          height: 18px;
+          cursor: pointer;
+          accent-color: #3b82f6;
+          margin-right: 8px;
         }
 
         .select {
@@ -311,24 +322,15 @@ export const QueryExplorer: React.FC = () => {
           </select>
         </div>
 
-        <button
-          type="button"
-          className="button button-primary"
-          onClick={handleExecuteQuery}
-          disabled={isLoading}
-        >
-          {isLoading ? (
-            <>
-              <span>⏳</span>
-              Executing...
-            </>
-          ) : (
-            <>
-              <span>▶️</span>
-              Execute Query
-            </>
-          )}
-        </button>
+        <div className="control-group">
+          <label htmlFor="inference-toggle">Enable Inference</label>
+          <input
+            type="checkbox"
+            id="inference-toggle"
+            checked={inference}
+            onChange={(e) => setInference(e.target.checked)}
+          />
+        </div>
       </div>
 
       {errorMessage && (
@@ -349,6 +351,26 @@ export const QueryExplorer: React.FC = () => {
             placeholder="Enter your SPARQL query here..."
             minHeight="400px"
           />
+          <div style={{ marginTop: '16px' }}>
+            <button
+              type="button"
+              className="button button-primary"
+              onClick={handleExecuteQuery}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <span>⏳</span>
+                  Executing...
+                </>
+              ) : (
+                <>
+                  <span>▶️</span>
+                  Execute Query
+                </>
+              )}
+            </button>
+          </div>
         </div>
 
         <div className="editor-panel">
