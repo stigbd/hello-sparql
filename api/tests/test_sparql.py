@@ -46,7 +46,7 @@ async def test_sparql_with_valid_data_and_query_as_json(
         response = await ac.post(
             "/sparql",
             headers=headers,
-            json={"query": query, "data": data, "inference": True},
+            json={"query": query, "data": data},
         )
     assert response.status_code == HTTPStatus.OK, response.json()
     assert headers["Accept"] in response.headers["content-type"]
@@ -54,7 +54,7 @@ async def test_sparql_with_valid_data_and_query_as_json(
 
 @pytest.mark.anyio
 async def test_sparql_with_valid_data_and_query_as_form() -> None:
-    """Should fail with etc."""
+    """Should fail with 415 Unsupported media type."""
     query = "SELECT ?s ?p ?o WHERE { ?s ?p ?o }"
     data = """
     @prefix ex: <http://example.org/> .
@@ -175,3 +175,41 @@ async def test_sparql_with_valid_data_and_construct_query_as_json(
             "/sparql", headers=headers, json={"query": query, "data": data}
         )
     assert response.status_code == HTTPStatus.NOT_IMPLEMENTED, response.json()
+
+
+@pytest.mark.anyio
+@pytest.mark.parametrize(
+    "headers",
+    [
+        {"Accept": "text/plain"},
+        {"Accept": "application/json"},
+        {"Accept": "text/csv"},
+        {"Accept": "text/xml"},
+    ],
+)
+@pytest.mark.anyio
+async def test_sparql_with_inference_valid_data_and_query_as_json(
+    headers: dict[str, str],
+) -> None:
+    """Should return 200 OK and text body."""
+    query = "SELECT ?s ?p ?o WHERE { ?s ?p ?o }"
+    data = """
+    @prefix ex: <http://example.org/> .
+    @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+    @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+    ex:Alice
+	a ex:Person ;
+	ex:ssn "987-65-432A" .
+	"""
+
+    async with AsyncClient(
+        transport=ASGITransport(app=app), base_url="http://test"
+    ) as ac:
+        response = await ac.post(
+            "/sparql",
+            headers=headers,
+            json={"query": query, "data": data, "inference": True},
+        )
+    assert response.status_code == HTTPStatus.OK, response.json()
+    assert headers["Accept"] in response.headers["content-type"]

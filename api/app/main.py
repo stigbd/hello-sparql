@@ -2,12 +2,13 @@
 
 from http import HTTPStatus
 
-import rdflib
 from fastapi import Depends, FastAPI, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
+from owlrl import DeductiveClosure, OWLRL_Semantics
 from pydantic import BaseModel
 from pyshacl import validate
-from rdflib.exceptions import ParserError
+from rdflib import Graph
+from rdflib.exceptions import Error, ParserError
 from rdflib.plugins.sparql import prepareQuery
 
 app = FastAPI()
@@ -32,6 +33,7 @@ class SPARQLRequest(BaseModel):
 
     data: str
     query: str
+    inference: bool = False
 
 
 class SHACLRequest(BaseModel):
@@ -77,23 +79,32 @@ async def run_sparql(request: Request, sparql_request: SPARQLRequest) -> Respons
     # Determine the format of the response based on the Accept header:
     serialization_format, media_type = await get_format_and_media_type(request)
     # Parse the RDF data into a graph:
-    g = rdflib.Graph()
+    graph = Graph()
     try:
-        g.parse(data=sparql_request.data)
-    except ParserError as e:
+        graph.parse(data=sparql_request.data)
+    except Error as e:
+        msg = f"Error: {type(e)} : " + str(e)
+        raise HTTPException(status_code=400, detail=msg) from e
+    except Exception as e:  # pragma: no cover
         msg = "Invalid RDF data: " + str(e)
         raise HTTPException(status_code=400, detail=msg) from e
 
+    if sparql_request.inference:
+        try:
+            DeductiveClosure(OWLRL_Semantics).expand(graph)
+        except Exception as e:  # pragma: no cover
+            msg = "Error running inference: " + str(e)
+            raise HTTPException(status_code=400, detail=msg) from e
     # Parse the SPARQL query into a query object:
     try:
-        q = prepareQuery(sparql_request.query)
+        query = prepareQuery(sparql_request.query)
     except Exception as e:
         msg = "Invalid SPARQL query: " + str(e)
         raise HTTPException(status_code=400, detail=msg) from e
 
     # Run the query:
     try:
-        qres = g.query(q)
+        qres = graph.query(query)
     except Exception as e:  # pragma: no cover
         msg = "Error running SPARQL query: " + str(e)
         raise HTTPException(status_code=400, detail=msg) from e
@@ -135,7 +146,7 @@ async def run_shacl(request: Request, shacl_request: SHACLRequest) -> Response:
     serialization_format, media_type = await get_format_and_media_type(request)
 
     # Parse the RDF data into a graph:
-    data_graph = rdflib.Graph()
+    data_graph = Graph()
     try:
         data_graph.parse(data=shacl_request.data)
     except ParserError as e:
@@ -143,7 +154,7 @@ async def run_shacl(request: Request, shacl_request: SHACLRequest) -> Response:
         raise HTTPException(status_code=400, detail=msg) from e
 
     # Parse the SHACL shapes into a graph:
-    shapes_graph = rdflib.Graph()
+    shapes_graph = Graph()
     try:
         shapes_graph.parse(data=shacl_request.shapes)
     except ParserError as e:

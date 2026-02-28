@@ -190,9 +190,48 @@ describe('SPARQLClient', () => {
         JSON.stringify({
           query: 'SELECT * WHERE { ?s ?p ?o }',
           data: '@prefix ex: <http://example.org/>.',
+          inference: false,
         })
       );
       expect(callArgs.headers['Content-Type']).toBe('application/json');
+    });
+
+    it('sends inference parameter as true when specified', async () => {
+      mockFetch.mockResolvedValue({
+        ok: true,
+        text: () => Promise.resolve('results'),
+      });
+
+      await client.executeQuery({
+        query: 'SELECT * WHERE { ?s ?p ?o }',
+        data: '@prefix ex: <http://example.org/>.',
+        inference: true,
+      });
+
+      const callArgs = mockFetch.mock.calls[0][1];
+      expect(callArgs.body).toBe(
+        JSON.stringify({
+          query: 'SELECT * WHERE { ?s ?p ?o }',
+          data: '@prefix ex: <http://example.org/>.',
+          inference: true,
+        })
+      );
+    });
+
+    it('defaults inference to false when not specified', async () => {
+      mockFetch.mockResolvedValue({
+        ok: true,
+        text: () => Promise.resolve('results'),
+      });
+
+      await client.executeQuery({
+        query: 'SELECT * WHERE { ?s ?p ?o }',
+        data: '@prefix ex: <http://example.org/>.',
+      });
+
+      const callArgs = mockFetch.mock.calls[0][1];
+      const body = JSON.parse(callArgs.body as string);
+      expect(body.inference).toBe(false);
     });
 
     it('throws SPARQLAPIError on HTTP error with JSON response', async () => {

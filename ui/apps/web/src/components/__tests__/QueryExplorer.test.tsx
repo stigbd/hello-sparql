@@ -110,6 +110,18 @@ describe('QueryExplorer', () => {
     expect(screen.getByText('Enter your SPARQL query below')).toBeInTheDocument();
   });
 
+  it('renders inference checkbox', () => {
+    const Wrapper = createWrapper();
+    render(
+      <Wrapper>
+        <QueryExplorer />
+      </Wrapper>
+    );
+
+    expect(screen.getByLabelText('Enable Inference')).toBeInTheDocument();
+    expect(screen.getByRole('checkbox', { name: /Enable Inference/i })).not.toBeChecked();
+  });
+
   it('renders RDF data editor', () => {
     const Wrapper = createWrapper();
     render(
@@ -420,6 +432,74 @@ describe('QueryExplorer', () => {
 
     // The duration is managed internally by the component
     // We would need to trigger the actual flow to see it
+  });
+
+  it('toggles inference checkbox when clicked', async () => {
+    const user = userEvent.setup();
+    const Wrapper = createWrapper();
+
+    render(
+      <Wrapper>
+        <QueryExplorer />
+      </Wrapper>
+    );
+
+    const inferenceCheckbox = screen.getByRole('checkbox', { name: /Enable Inference/i });
+    expect(inferenceCheckbox).not.toBeChecked();
+
+    await user.click(inferenceCheckbox);
+    expect(inferenceCheckbox).toBeChecked();
+
+    await user.click(inferenceCheckbox);
+    expect(inferenceCheckbox).not.toBeChecked();
+  });
+
+  it('passes inference parameter to executeQuery', async () => {
+    const user = userEvent.setup();
+    const Wrapper = createWrapper();
+
+    render(
+      <Wrapper>
+        <QueryExplorer />
+      </Wrapper>
+    );
+
+    // Enable inference
+    const inferenceCheckbox = screen.getByRole('checkbox', { name: /Enable Inference/i });
+    await user.click(inferenceCheckbox);
+
+    // Execute query
+    const executeButton = screen.getByRole('button', { name: /Execute Query/i });
+    await user.click(executeButton);
+
+    expect(mockExecuteQuery).toHaveBeenCalledWith({
+      request: expect.objectContaining({
+        inference: true,
+      }),
+      format: 'txt',
+    });
+  });
+
+  it('passes inference as false when checkbox is unchecked', async () => {
+    const user = userEvent.setup();
+    const Wrapper = createWrapper();
+
+    render(
+      <Wrapper>
+        <QueryExplorer />
+      </Wrapper>
+    );
+
+    // Execute query without enabling inference
+    const executeButton = screen.getByRole('button', { name: /Execute Query/i });
+    await user.click(executeButton);
+
+    expect(mockExecuteQuery).toHaveBeenCalledWith({
+      request: expect.objectContaining({
+        inference: false,
+      }),
+      format: 'txt',
+    });
   });
 
   it('applies correct CSS styles', () => {
