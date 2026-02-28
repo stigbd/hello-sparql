@@ -1,4 +1,9 @@
-import type { SPARQLQueryRequest, SPARQLError, SerializationFormat } from '@hello-sparql/types';
+import type {
+  SPARQLQueryRequest,
+  SPARQLResponse,
+  SPARQLError,
+  SerializationFormat,
+} from '@hello-sparql/types';
 
 export class SPARQLAPIError extends Error {
   constructor(
@@ -29,7 +34,7 @@ export class SPARQLClient {
   async executeQuery(
     request: SPARQLQueryRequest,
     format: SerializationFormat = 'txt'
-  ): Promise<string> {
+  ): Promise<SPARQLResponse> {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), this.timeout);
 
@@ -63,7 +68,8 @@ export class SPARQLClient {
         );
       }
 
-      return await response.text();
+      const data: SPARQLResponse = await response.json();
+      return data;
     } catch (error) {
       clearTimeout(timeoutId);
 

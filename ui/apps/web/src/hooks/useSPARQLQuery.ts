@@ -3,7 +3,7 @@ import { createSPARQLClient, type SPARQLAPIError } from '@hello-sparql/api-clien
 import type { SPARQLQueryRequest, SerializationFormat } from '@hello-sparql/types';
 
 interface UseSPARQLQueryOptions {
-  onSuccess?: (data: string, duration: number) => void;
+  onSuccess?: (data: string, duration: number, length: number) => void;
   onError?: (error: SPARQLAPIError) => void;
 }
 
@@ -19,14 +19,14 @@ export const useSPARQLQuery = (options?: UseSPARQLQueryOptions) => {
       format?: SerializationFormat;
     }) => {
       const startTime = performance.now();
-      const result = await client.executeQuery(request, format);
+      const response = await client.executeQuery(request, format);
       const endTime = performance.now();
       const duration = (endTime - startTime) / 1000;
 
-      return { result, duration };
+      return { result: response.result, duration, length: response.length };
     },
     onSuccess: (data) => {
-      options?.onSuccess?.(data.result, data.duration);
+      options?.onSuccess?.(data.result, data.duration, data.length);
     },
     onError: (error: SPARQLAPIError) => {
       options?.onError?.(error);

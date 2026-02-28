@@ -36,6 +36,14 @@ class SPARQLRequest(BaseModel):
     inference: bool = False
 
 
+class SPARQLResponse(BaseModel):
+    """Response model for the result of running a SPARQL query on RDF data."""
+
+    length: int
+    result_content_type: str | None = None
+    result: str
+
+
 class SHACLRequest(BaseModel):
     """Request model for running a SHACL validation on RDF data."""
 
@@ -74,7 +82,7 @@ async def check_content_type(request: Request) -> None:
         },
     },
 )
-async def run_sparql(request: Request, sparql_request: SPARQLRequest) -> Response:
+async def run_sparql(request: Request, sparql_request: SPARQLRequest) -> SPARQLResponse:
     """Run the given SPARQL query on the provided RDF data."""
     # Determine the format of the response based on the Accept header:
     serialization_format, media_type = await get_format_and_media_type(request)
@@ -115,10 +123,10 @@ async def run_sparql(request: Request, sparql_request: SPARQLRequest) -> Respons
 
     # Serialize the result:
     try:
-        content = qres.serialize(format=serialization_format)
-        return Response(
-            content=content,
-            media_type=media_type,
+        length = len(qres)
+        result = qres.serialize(format=serialization_format)
+        return SPARQLResponse(
+            length=length, result=result, result_content_type=media_type
         )
     except Exception as e:  # pragma: no cover
         msg = "Error serializing query results: " + str(e)

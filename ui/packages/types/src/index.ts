@@ -4,6 +4,11 @@ export interface SPARQLQueryRequest {
   inference?: boolean;
 }
 
+export interface SPARQLResponse {
+  length: number;
+  result: string;
+}
+
 export interface SPARQLQueryResponse {
   results: SPARQLResult[];
 }

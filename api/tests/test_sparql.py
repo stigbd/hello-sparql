@@ -28,7 +28,7 @@ def anyio_backend() -> str:
 async def test_sparql_with_valid_data_and_query_as_json(
     headers: dict[str, str],
 ) -> None:
-    """Should return 200 OK and text body."""
+    """Should return 200 OK and json body with correct content type."""
     query = "SELECT ?s ?p ?o WHERE { ?s ?p ?o }"
     data = """
     @prefix ex: <http://example.org/> .
@@ -49,7 +49,15 @@ async def test_sparql_with_valid_data_and_query_as_json(
             json={"query": query, "data": data},
         )
     assert response.status_code == HTTPStatus.OK, response.json()
-    assert headers["Accept"] in response.headers["content-type"]
+    assert response.headers["content-type"] == "application/json"
+    data = response.json()
+    assert "length" in data
+    assert isinstance(data["length"], int)
+    assert data["length"] > 0
+    assert "result" in data
+    assert len(data["result"]) > 0
+    assert "result_content_type" in data
+    assert data["result_content_type"] == headers["Accept"]
 
 
 @pytest.mark.anyio
@@ -212,4 +220,12 @@ async def test_sparql_with_inference_valid_data_and_query_as_json(
             json={"query": query, "data": data, "inference": True},
         )
     assert response.status_code == HTTPStatus.OK, response.json()
-    assert headers["Accept"] in response.headers["content-type"]
+    assert response.headers["content-type"] == "application/json"
+    data = response.json()
+    assert "length" in data
+    assert isinstance(data["length"], int)
+    assert data["length"] > 0
+    assert "result" in data
+    assert len(data["result"]) > 0
+    assert "result_content_type" in data
+    assert data["result_content_type"] == headers["Accept"]

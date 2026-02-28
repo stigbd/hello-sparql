@@ -12,12 +12,14 @@ export const QueryExplorer: React.FC = () => {
   const [inference, setInference] = useState<boolean>(false);
   const [result, setResult] = useState<string>('');
   const [duration, setDuration] = useState<number>(0);
+  const [length, setLength] = useState<number>(0);
   const [errorMessage, setErrorMessage] = useState<string>('');
 
   const { executeQuery, isLoading } = useSPARQLQuery({
-    onSuccess: (data, executionDuration) => {
+    onSuccess: (data, executionDuration, resultLength) => {
       setResult(data);
       setDuration(executionDuration);
+      setLength(resultLength);
       setErrorMessage('');
     },
     onError: (error) => {
@@ -390,7 +392,9 @@ export const QueryExplorer: React.FC = () => {
         <div className="results-header">
           <h2>Results</h2>
           {duration > 0 && (
-            <span className="execution-time">Executed in {duration.toFixed(3)}s</span>
+            <span className="execution-time">
+              {length} {length === 1 ? 'result' : 'results'} in {duration.toFixed(3)}s
+            </span>
           )}
         </div>
 

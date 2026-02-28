@@ -69,10 +69,13 @@ describe('SPARQLClient', () => {
     });
 
     it('executes query successfully with default format', async () => {
-      const mockResponse = '| s | p | o |\n|---|---|---|\n| ex:John | rdf:type | ex:Person |';
+      const mockResponse = {
+        length: 1,
+        result: '| s | p | o |\n|---|---|---|\n| ex:John | rdf:type | ex:Person |',
+      };
       mockFetch.mockResolvedValue({
         ok: true,
-        text: () => Promise.resolve(mockResponse),
+        json: () => Promise.resolve(mockResponse),
       });
 
       const result = await client.executeQuery({
@@ -80,7 +83,9 @@ describe('SPARQLClient', () => {
         data: '@prefix ex: <http://example.org/>.',
       });
 
-      expect(result).toBe(mockResponse);
+      expect(result).toEqual(mockResponse);
+      expect(result.length).toBe(1);
+      expect(result.result).toContain('ex:John');
       expect(mockFetch).toHaveBeenCalledWith(
         'http://localhost:8000/sparql',
         expect.objectContaining({
@@ -94,10 +99,10 @@ describe('SPARQLClient', () => {
     });
 
     it('executes query with JSON format', async () => {
-      const mockResponse = '{"results":[]}';
+      const mockResponse = { length: 0, result: '{"results":[]}' };
       mockFetch.mockResolvedValue({
         ok: true,
-        text: () => Promise.resolve(mockResponse),
+        json: () => Promise.resolve(mockResponse),
       });
 
       const result = await client.executeQuery(
@@ -108,7 +113,8 @@ describe('SPARQLClient', () => {
         'json'
       );
 
-      expect(result).toBe(mockResponse);
+      expect(result).toEqual(mockResponse);
+      expect(result.length).toBe(0);
       expect(mockFetch).toHaveBeenCalledWith(
         'http://localhost:8000/sparql',
         expect.objectContaining({
@@ -121,10 +127,10 @@ describe('SPARQLClient', () => {
     });
 
     it('executes query with CSV format', async () => {
-      const mockResponse = 's,p,o\nex:John,rdf:type,ex:Person';
+      const mockResponse = { length: 1, result: 's,p,o\nex:John,rdf:type,ex:Person' };
       mockFetch.mockResolvedValue({
         ok: true,
-        text: () => Promise.resolve(mockResponse),
+        json: () => Promise.resolve(mockResponse),
       });
 
       const result = await client.executeQuery(
@@ -135,7 +141,8 @@ describe('SPARQLClient', () => {
         'csv'
       );
 
-      expect(result).toBe(mockResponse);
+      expect(result).toEqual(mockResponse);
+      expect(result.length).toBe(1);
       expect(mockFetch).toHaveBeenCalledWith(
         'http://localhost:8000/sparql',
         expect.objectContaining({
@@ -148,10 +155,10 @@ describe('SPARQLClient', () => {
     });
 
     it('executes query with XML format', async () => {
-      const mockResponse = '<results></results>';
+      const mockResponse = { length: 0, result: '<results></results>' };
       mockFetch.mockResolvedValue({
         ok: true,
-        text: () => Promise.resolve(mockResponse),
+        json: () => Promise.resolve(mockResponse),
       });
 
       const result = await client.executeQuery(
@@ -162,7 +169,8 @@ describe('SPARQLClient', () => {
         'xml'
       );
 
-      expect(result).toBe(mockResponse);
+      expect(result).toEqual(mockResponse);
+      expect(result.length).toBe(0);
       expect(mockFetch).toHaveBeenCalledWith(
         'http://localhost:8000/sparql',
         expect.objectContaining({
@@ -177,7 +185,7 @@ describe('SPARQLClient', () => {
     it('sends query and data as JSON', async () => {
       mockFetch.mockResolvedValue({
         ok: true,
-        text: () => Promise.resolve('results'),
+        json: () => Promise.resolve({ length: 0, result: 'results' }),
       });
 
       await client.executeQuery({
@@ -199,7 +207,7 @@ describe('SPARQLClient', () => {
     it('sends inference parameter as true when specified', async () => {
       mockFetch.mockResolvedValue({
         ok: true,
-        text: () => Promise.resolve('results'),
+        json: () => Promise.resolve({ length: 0, result: 'results' }),
       });
 
       await client.executeQuery({
@@ -221,7 +229,7 @@ describe('SPARQLClient', () => {
     it('defaults inference to false when not specified', async () => {
       mockFetch.mockResolvedValue({
         ok: true,
-        text: () => Promise.resolve('results'),
+        json: () => Promise.resolve({ length: 0, result: 'results' }),
       });
 
       await client.executeQuery({
@@ -333,7 +341,7 @@ describe('SPARQLClient', () => {
 
       mockFetch.mockResolvedValue({
         ok: true,
-        text: () => Promise.resolve('results'),
+        json: () => Promise.resolve({ length: 0, result: 'results' }),
       });
 
       await client.executeQuery({
@@ -362,7 +370,7 @@ describe('SPARQLClient', () => {
     it('uses abort controller for request cancellation', async () => {
       mockFetch.mockResolvedValue({
         ok: true,
-        text: () => Promise.resolve('results'),
+        json: () => Promise.resolve({ length: 0, result: 'results' }),
       });
 
       await client.executeQuery({

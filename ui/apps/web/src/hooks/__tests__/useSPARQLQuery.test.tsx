@@ -63,7 +63,10 @@ describe('useSPARQLQuery', () => {
   });
 
   it('executes query successfully', async () => {
-    const mockResult = '| s | p | o |\n|---|---|---|\n| ex:John | rdf:type | ex:Person |';
+    const mockResult = {
+      length: 1,
+      result: '| s | p | o |\n|---|---|---|\n| ex:John | rdf:type | ex:Person |',
+    };
     mockExecuteQuery.mockResolvedValue(mockResult);
 
     const onSuccess = vi.fn();
@@ -83,10 +86,11 @@ describe('useSPARQLQuery', () => {
     });
 
     expect(result.current.isLoading).toBe(false);
-    expect(result.current.data?.result).toBe(mockResult);
+    expect(result.current.data?.result).toBe(mockResult.result);
     expect(onSuccess).toHaveBeenCalled();
-    expect(onSuccess.mock.calls[0][0]).toBe(mockResult);
+    expect(onSuccess.mock.calls[0][0]).toBe(mockResult.result);
     expect(typeof onSuccess.mock.calls[0][1]).toBe('number'); // duration
+    expect(onSuccess.mock.calls[0][2]).toBe(1); // length
   });
 
   it('handles query execution error', async () => {
@@ -114,7 +118,7 @@ describe('useSPARQLQuery', () => {
   });
 
   it('executes query with different formats', async () => {
-    const mockResult = '{"results":[]}';
+    const mockResult = { length: 0, result: '{"results":[]}' };
     mockExecuteQuery.mockResolvedValue(mockResult);
 
     const { result } = renderHook(() => useSPARQLQuery(), {
@@ -136,7 +140,7 @@ describe('useSPARQLQuery', () => {
   });
 
   it('defaults to txt format when format is not specified', async () => {
-    const mockResult = 'results';
+    const mockResult = { length: 0, result: 'results' };
     mockExecuteQuery.mockResolvedValue(mockResult);
 
     const { result } = renderHook(() => useSPARQLQuery(), {
@@ -158,7 +162,7 @@ describe('useSPARQLQuery', () => {
   });
 
   it('calculates execution duration', async () => {
-    const mockResult = 'results';
+    const mockResult = { length: 0, result: 'results' };
     mockExecuteQuery.mockImplementation(
       () =>
         new Promise((resolve) => {
@@ -189,7 +193,7 @@ describe('useSPARQLQuery', () => {
   });
 
   it('can reset the mutation state', async () => {
-    const mockResult = 'results';
+    const mockResult = { length: 0, result: 'results' };
     mockExecuteQuery.mockResolvedValue(mockResult);
 
     const { result } = renderHook(() => useSPARQLQuery(), {
@@ -224,8 +228,8 @@ describe('useSPARQLQuery', () => {
   });
 
   it('handles multiple sequential queries', async () => {
-    const mockResult1 = 'result1';
-    const mockResult2 = 'result2';
+    const mockResult1 = { length: 1, result: 'result1' };
+    const mockResult2 = { length: 2, result: 'result2' };
     mockExecuteQuery.mockResolvedValueOnce(mockResult1).mockResolvedValueOnce(mockResult2);
 
     const { result } = renderHook(() => useSPARQLQuery(), {
@@ -248,12 +252,12 @@ describe('useSPARQLQuery', () => {
       expect(result.current.isSuccess).toBe(true);
     });
 
-    expect(result.current.data?.result).toBe(mockResult1);
+    expect(result.current.data?.result).toBe(mockResult1.result);
 
     result.current.executeQuery({ request: request2, format: 'txt' });
 
     await waitFor(() => {
-      expect(result.current.data?.result).toBe(mockResult2);
+      expect(result.current.data?.result).toBe(mockResult2.result);
     });
   });
 
@@ -283,7 +287,7 @@ describe('useSPARQLQuery', () => {
   });
 
   it('does not call onError when query succeeds', async () => {
-    const mockResult = 'results';
+    const mockResult = { length: 0, result: 'results' };
     mockExecuteQuery.mockResolvedValue(mockResult);
 
     const onSuccess = vi.fn();
