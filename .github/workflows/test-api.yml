@@ -8,6 +8,12 @@ on:
     paths:
       - "api/**"
       - ".github/workflows/test-api.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "api/**"
+      - ".github/workflows/test-api.yml"
 
 defaults:
   run:

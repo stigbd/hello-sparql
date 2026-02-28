@@ -8,6 +8,12 @@ on:
     paths:
       - "ui/**"
       - ".github/workflows/test-ui.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "ui/**"
+      - ".github/workflows/test-ui.yml"
 
 defaults:
   run:
