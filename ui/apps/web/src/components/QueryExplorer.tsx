@@ -1,9 +1,9 @@
+import type { SerializationFormat } from '@hello-sparql/types';
+import { CodeEditor, LoadingSpinner, ResultsTable } from '@hello-sparql/ui';
 import type React from 'react';
 import { useState } from 'react';
-import { CodeEditor, ResultsTable, LoadingSpinner } from '@hello-sparql/ui';
-import type { SerializationFormat } from '@hello-sparql/types';
+import { DEFAULT_QUERY, INITIAL_DATA, QUERY_TEMPLATES } from '../constants/queries';
 import { useSPARQLQuery } from '../hooks/useSPARQLQuery';
-import { QUERY_TEMPLATES, INITIAL_DATA, DEFAULT_QUERY } from '../constants/queries';
 
 export const QueryExplorer: React.FC = () => {
   const [query, setQuery] = useState<string>(DEFAULT_QUERY);

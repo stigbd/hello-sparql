@@ -1,6 +1,6 @@
-import { useMutation } from '@tanstack/react-query';
-import { createSPARQLClient, type SPARQLAPIError } from '@hello-sparql/api-client';
+import { type SPARQLAPIError, createSPARQLClient } from '@hello-sparql/api-client';
 import type { SPARQLQueryRequest, SerializationFormat } from '@hello-sparql/types';
+import { useMutation } from '@tanstack/react-query';
 
 interface UseSPARQLQueryOptions {
   onSuccess?: (data: string, duration: number, length: number) => void;

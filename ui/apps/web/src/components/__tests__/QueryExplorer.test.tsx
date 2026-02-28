@@ -1,9 +1,9 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { QueryExplorer } from '../QueryExplorer';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import * as useSPARQLQueryModule from '../../hooks/useSPARQLQuery';
+import { QueryExplorer } from '../QueryExplorer';
 
 // Mock the hook
 vi.mock('../../hooks/useSPARQLQuery');

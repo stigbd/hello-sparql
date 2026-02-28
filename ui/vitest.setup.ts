@@ -1,8 +1,8 @@
 import '@testing-library/jest-dom';
-import { cleanup } from '@testing-library/react';
-import { afterEach, vi, beforeAll, afterAll } from 'vitest';
-import { expect } from 'vitest';
 import * as matchers from '@testing-library/jest-dom/matchers';
+import { cleanup } from '@testing-library/react';
+import { afterAll, afterEach, beforeAll, vi } from 'vitest';
+import { expect } from 'vitest';
 
 // Extend Vitest's expect with jest-dom matchers
 expect.extend(matchers);

@@ -1,9 +1,9 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { renderHook, waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import type { ReactNode } from 'react';
-import { useSPARQLQuery } from '../useSPARQLQuery';
 import * as apiClient from '@hello-sparql/api-client';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { renderHook, waitFor } from '@testing-library/react';
+import type { ReactNode } from 'react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { useSPARQLQuery } from '../useSPARQLQuery';
 
 // Mock the API client
 vi.mock('@hello-sparql/api-client', () => ({
