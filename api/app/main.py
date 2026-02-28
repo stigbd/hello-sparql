@@ -105,26 +105,30 @@ async def run_sparql(request: Request, sparql_request: SPARQLRequest) -> SPARQLR
             raise HTTPException(status_code=400, detail=msg) from e
     # Parse the SPARQL query into a query object:
     try:
-        query = prepareQuery(sparql_request.query)
+        parsed_query = prepareQuery(sparql_request.query)
     except Exception as e:
         msg = "Invalid SPARQL query: " + str(e)
         raise HTTPException(status_code=400, detail=msg) from e
 
+    # Check that the query is a SELECT or ASK query:
+    if parsed_query.algebra.name not in ("SelectQuery", "AskQuery"):
+        msg = "Only SELECT and ASK queries are supported"
+        raise HTTPException(status_code=501, detail=msg)
+
     # Run the query:
     try:
-        qres = graph.query(query)
+        qres = graph.query(parsed_query)
     except Exception as e:  # pragma: no cover
         msg = "Error running SPARQL query: " + str(e)
         raise HTTPException(status_code=400, detail=msg) from e
 
-    if qres.type == "CONSTRUCT":  # pragma: no cover
-        msg = "Construct queries are not supported"
-        raise HTTPException(status_code=501, detail=msg)
-
     # Serialize the result:
     try:
         length = len(qres)
-        result = qres.serialize(format=serialization_format)
+        if parsed_query.algebra.name == "AskQuery":
+            result = "true" if qres.askAnswer else "false"
+        else:
+            result = qres.serialize(format=serialization_format)
         return SPARQLResponse(
             length=length, result=result, result_content_type=media_type
         )
