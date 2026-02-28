@@ -25,7 +25,7 @@ def anyio_backend() -> str:
     ],
 )
 @pytest.mark.anyio
-async def test_sparql_with_valid_data_and_query_as_json(
+async def test_select_query_with_valid_data_and_query_as_json(
     headers: dict[str, str],
 ) -> None:
     """Should return 200 OK and json body with correct content type."""
@@ -61,7 +61,7 @@ async def test_sparql_with_valid_data_and_query_as_json(
 
 
 @pytest.mark.anyio
-async def test_sparql_with_valid_data_and_query_as_form() -> None:
+async def test_select_query_with_valid_data_and_query_as_form() -> None:
     """Should fail with 415 Unsupported media type."""
     query = "SELECT ?s ?p ?o WHERE { ?s ?p ?o }"
     data = """
@@ -82,7 +82,7 @@ async def test_sparql_with_valid_data_and_query_as_form() -> None:
 
 
 @pytest.mark.anyio
-async def test_sparql_with_invalid_data_and_valid_query() -> None:
+async def test_select_query_with_invalid_data_and_valid_query() -> None:
     """Should return 400 OK and json body."""
     query = "SELECT ?s ?p ?o WHERE { ?s ?p ?o }"
     invalid_data = """
@@ -104,7 +104,7 @@ async def test_sparql_with_invalid_data_and_valid_query() -> None:
 
 
 @pytest.mark.anyio
-async def test_sparql_with_valid_data_and_invalid_query() -> None:
+async def test_select_query_with_valid_data_and_invalid_query() -> None:
     """Should return 400 OK and json body."""
     invalid_query = "SELECT ?s ?p ?o WHERE "
     data = """
@@ -126,7 +126,7 @@ async def test_sparql_with_valid_data_and_invalid_query() -> None:
 
 
 @pytest.mark.anyio
-async def test_sparql_with_unsupported_data_format() -> None:
+async def test_select_query_with_unsupported_data_format() -> None:
     """Should return 406 NOT ACCEPTABLE and json body."""
     headers = {"Accept": "unsupported"}
 
@@ -161,7 +161,7 @@ async def test_sparql_with_unsupported_data_format() -> None:
         {"Accept": "text/xml"},
     ],
 )
-async def test_sparql_with_valid_data_and_construct_query_as_json(
+async def test_construct_query(
     headers: dict[str, str],
 ) -> None:
     """Should return 501 Not Implemented."""
@@ -196,7 +196,7 @@ async def test_sparql_with_valid_data_and_construct_query_as_json(
     ],
 )
 @pytest.mark.anyio
-async def test_sparql_with_inference_valid_data_and_query_as_json(
+async def test_select_query_with_inference_valid_data_and_query_as_json(
     headers: dict[str, str],
 ) -> None:
     """Should return 200 OK and text body."""
@@ -229,3 +229,74 @@ async def test_sparql_with_inference_valid_data_and_query_as_json(
     assert len(data["result"]) > 0
     assert "result_content_type" in data
     assert data["result_content_type"] == headers["Accept"]
+
+
+@pytest.mark.anyio
+async def test_ask_query_truthy() -> None:
+    """Should return 200 OK and the string true."""
+    data = """
+    @prefix ex: <http://example.org/> .
+    @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+    @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+    ex:Alice
+	a ex:Person ;
+	ex:ssn "987-65-432A" .
+	"""
+
+    query = """
+    PREFIX ex: <http://example.org/>
+
+    ASK WHERE { ex:Alice a ex:Person . }
+    """
+    async with AsyncClient(
+        transport=ASGITransport(app=app), base_url="http://test"
+    ) as ac:
+        response = await ac.post(
+            "/sparql",
+            json={"query": query, "data": data},
+        )
+    assert response.status_code == HTTPStatus.OK, response.json()
+    assert response.headers["content-type"] == "application/json"
+    data = response.json()
+    assert "length" in data
+    assert isinstance(data["length"], int)
+    assert data["length"] == 1
+    assert "result" in data
+    assert data["result"] == "true"
+
+
+@pytest.mark.anyio
+async def test_ask_query_falsy() -> None:
+    """Should return 200 OK and the string false."""
+    data = """
+    @prefix ex: <http://example.org/> .
+    @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+    @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+    ex:Alice
+	a ex:Person ;
+	ex:ssn "987-65-432A" .
+	"""
+
+    query = """
+    PREFIX ex: <http://example.org/>
+
+    ASK WHERE { ex:Alice a ex:Animal . }
+    """
+
+    async with AsyncClient(
+        transport=ASGITransport(app=app), base_url="http://test"
+    ) as ac:
+        response = await ac.post(
+            "/sparql",
+            json={"query": query, "data": data},
+        )
+    assert response.status_code == HTTPStatus.OK, response.json()
+    assert response.headers["content-type"] == "application/json"
+    data = response.json()
+    assert "length" in data
+    assert isinstance(data["length"], int)
+    assert data["length"] == 1
+    assert "result" in data
+    assert data["result"] == "false"

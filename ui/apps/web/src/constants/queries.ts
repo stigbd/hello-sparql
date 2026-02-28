@@ -13,6 +13,19 @@ WHERE {
     ?s ?p ?o .
 }`,
   },
+  ask: {
+    type: 'ask',
+    label: 'Basic Ask',
+    query: `PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX ex: <http://example.org/>
+
+ASK
+WHERE
+{
+    ?s ?p ?o .
+}`,
+  },
   count: {
     type: 'count',
     label: 'Count Query',

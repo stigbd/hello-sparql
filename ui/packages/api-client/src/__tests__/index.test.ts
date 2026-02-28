@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { SPARQLClient, SPARQLAPIError, createSPARQLClient } from '../index';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { SPARQLAPIError, SPARQLClient, createSPARQLClient } from '../index';
 
 declare const global: typeof globalThis;
 

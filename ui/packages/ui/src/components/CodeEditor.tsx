@@ -1,5 +1,5 @@
 import type React from 'react';
-import { useRef, useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 export interface CodeEditorProps {
   value: string;

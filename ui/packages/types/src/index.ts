@@ -21,7 +21,7 @@ export interface SPARQLError {
   detail: string;
 }
 
-export type QueryType = 'select' | 'construct' | 'count';
+export type QueryType = 'select' | 'ask' | 'construct' | 'count';
 
 export interface QueryTemplate {
   type: QueryType;

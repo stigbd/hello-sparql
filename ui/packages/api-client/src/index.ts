@@ -1,7 +1,7 @@
 import type {
+  SPARQLError,
   SPARQLQueryRequest,
   SPARQLResponse,
-  SPARQLError,
   SerializationFormat,
 } from '@hello-sparql/types';
 
