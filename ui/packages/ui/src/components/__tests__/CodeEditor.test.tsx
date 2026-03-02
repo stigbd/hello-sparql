@@ -72,9 +72,10 @@ describe('CodeEditor', () => {
       padding: '12px',
       border: '1px solid #e2e8f0',
       borderRadius: '6px',
-      backgroundColor: '#f8fafc',
-      color: '#1e293b',
     });
+
+    // The color is transparent for the overlay approach
+    expect(textarea).toHaveStyle({ color: 'transparent' });
   });
 
   it('disables spell check', () => {

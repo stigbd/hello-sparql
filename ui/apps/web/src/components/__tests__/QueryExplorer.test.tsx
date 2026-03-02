@@ -559,9 +559,11 @@ describe('QueryExplorer', () => {
     const explorer = document.querySelector('.query-explorer');
     expect(explorer).toBeInTheDocument();
 
-    const style = document.querySelector('style');
-    expect(style?.textContent).toContain('.query-explorer');
-    expect(style?.textContent).toContain('.button');
-    expect(style?.textContent).toContain('.editor-panel');
+    // Check that styles are present (may be multiple style tags due to Prism)
+    const styles = Array.from(document.querySelectorAll('style'));
+    const allStyles = styles.map((s) => s.textContent).join('');
+    expect(allStyles).toContain('.query-explorer');
+    expect(allStyles).toContain('.button');
+    expect(allStyles).toContain('.editor-panel');
   });
 });
