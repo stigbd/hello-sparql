@@ -3,5 +3,7 @@ packages:
   - packages/*
 
 ignoredBuiltDependencies:
-  - '@biomejs/biome'
+  - "@biomejs/biome"
   - esbuild
+
+useNodeVersion: "25.7.0"
