@@ -13,7 +13,7 @@ export const useSPARQLQuery = (options?: UseSPARQLQueryOptions) => {
   const mutation = useMutation({
     mutationFn: async ({
       request,
-      format = 'txt',
+      format = 'sparql-json',
     }: {
       request: SPARQLQueryRequest;
       format?: SerializationFormat;

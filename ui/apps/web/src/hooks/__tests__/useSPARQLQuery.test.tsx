@@ -76,10 +76,10 @@ describe('useSPARQLQuery', () => {
 
     const request = {
       query: 'SELECT * WHERE { ?s ?p ?o }',
-      data: '@prefix ex: <http://example.org/>.',
+      data: '@prefix ex: <http://example.org#>.',
     };
 
-    result.current.executeQuery({ request, format: 'txt' });
+    result.current.executeQuery({ request, format: 'sparql-json' });
 
     await waitFor(() => {
       expect(result.current.isSuccess).toBe(true);
@@ -104,10 +104,10 @@ describe('useSPARQLQuery', () => {
 
     const request = {
       query: 'INVALID QUERY',
-      data: '@prefix ex: <http://example.org/>.',
+      data: '@prefix ex: <http://example.org#>.',
     };
 
-    result.current.executeQuery({ request, format: 'txt' });
+    result.current.executeQuery({ request, format: 'sparql-json' });
 
     await waitFor(() => {
       expect(result.current.isError).toBe(true);
@@ -130,13 +130,13 @@ describe('useSPARQLQuery', () => {
       data: '@prefix ex: <http://example.org/>.',
     };
 
-    result.current.executeQuery({ request, format: 'json' });
+    result.current.executeQuery({ request, format: 'sparql-json' });
 
     await waitFor(() => {
       expect(result.current.isSuccess).toBe(true);
     });
 
-    expect(mockExecuteQuery).toHaveBeenCalledWith(request, 'json');
+    expect(mockExecuteQuery).toHaveBeenCalledWith(request, 'sparql-json');
   });
 
   it('defaults to txt format when format is not specified', async () => {
@@ -149,7 +149,7 @@ describe('useSPARQLQuery', () => {
 
     const request = {
       query: 'SELECT * WHERE { ?s ?p ?o }',
-      data: '@prefix ex: <http://example.org/>.',
+      data: '@prefix ex: <http://example.org#>.',
     };
 
     result.current.executeQuery({ request });
@@ -158,7 +158,7 @@ describe('useSPARQLQuery', () => {
       expect(result.current.isSuccess).toBe(true);
     });
 
-    expect(mockExecuteQuery).toHaveBeenCalledWith(request, 'txt');
+    expect(mockExecuteQuery).toHaveBeenCalledWith(request, 'sparql-json');
   });
 
   it('calculates execution duration', async () => {
@@ -177,10 +177,10 @@ describe('useSPARQLQuery', () => {
 
     const request = {
       query: 'SELECT * WHERE { ?s ?p ?o }',
-      data: '@prefix ex: <http://example.org/>.',
+      data: '@prefix ex: <http://example.org#>.',
     };
 
-    result.current.executeQuery({ request, format: 'txt' });
+    result.current.executeQuery({ request, format: 'sparql-json' });
 
     await waitFor(() => {
       expect(result.current.isSuccess).toBe(true);
@@ -205,7 +205,7 @@ describe('useSPARQLQuery', () => {
       data: '@prefix ex: <http://example.org/>.',
     };
 
-    result.current.executeQuery({ request, format: 'txt' });
+    result.current.executeQuery({ request, format: 'sparql-json' });
 
     await waitFor(() => {
       expect(result.current.isSuccess).toBe(true);
@@ -238,7 +238,7 @@ describe('useSPARQLQuery', () => {
 
     const request1 = {
       query: 'SELECT * WHERE { ?s ?p ?o }',
-      data: '@prefix ex: <http://example.org/>.',
+      data: '@prefix ex: <http://example.org#>.',
     };
 
     const request2 = {
@@ -246,7 +246,7 @@ describe('useSPARQLQuery', () => {
       data: '@prefix ex: <http://example.org/>.',
     };
 
-    result.current.executeQuery({ request: request1, format: 'txt' });
+    result.current.executeQuery({ request: request1, format: 'sparql-json' });
 
     await waitFor(() => {
       expect(result.current.isSuccess).toBe(true);
@@ -254,7 +254,7 @@ describe('useSPARQLQuery', () => {
 
     expect(result.current.data?.result).toBe(mockResult1.result);
 
-    result.current.executeQuery({ request: request2, format: 'txt' });
+    result.current.executeQuery({ request: request2, format: 'sparql-json' });
 
     await waitFor(() => {
       expect(result.current.data?.result).toBe(mockResult2.result);
@@ -276,7 +276,7 @@ describe('useSPARQLQuery', () => {
       data: 'data',
     };
 
-    result.current.executeQuery({ request, format: 'txt' });
+    result.current.executeQuery({ request, format: 'sparql-json' });
 
     await waitFor(() => {
       expect(result.current.isError).toBe(true);
@@ -301,7 +301,7 @@ describe('useSPARQLQuery', () => {
       data: '@prefix ex: <http://example.org/>.',
     };
 
-    result.current.executeQuery({ request, format: 'txt' });
+    result.current.executeQuery({ request, format: 'sparql-json' });
 
     await waitFor(() => {
       expect(result.current.isSuccess).toBe(true);

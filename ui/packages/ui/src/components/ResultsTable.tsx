@@ -1,72 +1,71 @@
+import type { SerializationFormat } from '@hello-sparql/types';
 import type React from 'react';
 
 export interface ResultsTableProps {
   data: string;
-  format: 'txt' | 'json' | 'csv' | 'xml';
+  format: SerializationFormat;
   className?: string;
 }
 
 export const ResultsTable: React.FC<ResultsTableProps> = ({ data, format, className = '' }) => {
   const renderContent = () => {
-    if (format === 'txt') {
-      const lines = data.split('\n').filter((line) => line.trim());
-      if (lines.length === 0) {
+    const lines = data.split('\n').filter((line) => line.trim());
+
+    if (lines.length === 0) {
+      return <div className="no-results">No results</div>;
+    }
+
+    // Check if data has pipe-separated table format
+    if (lines[0].includes('|')) {
+      const rows = lines.map((line) =>
+        line
+          .split('|')
+          .map((cell) => cell.trim())
+          .filter((cell) => cell)
+      );
+
+      if (rows.length === 0) {
         return <div className="no-results">No results</div>;
       }
 
-      if (lines[0].includes('|')) {
-        const rows = lines.map((line) =>
-          line
-            .split('|')
-            .map((cell) => cell.trim())
-            .filter((cell) => cell)
-        );
+      const headers = rows[0];
+      const dataRows = rows.slice(2);
 
-        if (rows.length === 0) {
-          return <div className="no-results">No results</div>;
-        }
-
-        const headers = rows[0];
-        const dataRows = rows.slice(2);
-
-        return (
-          <div className="table-container" style={{ overflowX: 'auto' }}>
-            <table className="results-table">
-              <thead>
-                <tr>
-                  {headers.map((header) => (
-                    <th key={header}>{header}</th>
+      return (
+        <div className="table-container" style={{ overflowX: 'auto' }}>
+          <table className="results-table">
+            <thead>
+              <tr>
+                {headers.map((header) => (
+                  <th key={header}>{header}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {dataRows.map((row, rowIndex) => (
+                <tr key={`row-${rowIndex}-${row[0]}`}>
+                  {row.map((cell, cellIndex) => (
+                    <td key={`${headers[cellIndex]}-${cellIndex}`}>{cell}</td>
                   ))}
                 </tr>
-              </thead>
-              <tbody>
-                {dataRows.map((row, rowIndex) => (
-                  <tr key={`row-${rowIndex}-${row[0]}`}>
-                    {row.map((cell, cellIndex) => (
-                      <td key={`${headers[cellIndex]}-${cellIndex}`}>{cell}</td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        );
-      }
+              ))}
+            </tbody>
+          </table>
+        </div>
+      );
     }
 
-    if (format === 'json') {
+    // Try to parse as JSON
+    if (format === 'sparql-json' || format === 'json-ld') {
       try {
         const parsed = JSON.parse(data);
         return <pre className="json-output">{JSON.stringify(parsed, null, 2)}</pre>;
-      } catch (error) {
-        return (
-          <div className="error-message">
-            Failed to parse JSON: {error instanceof Error ? error.message : 'Unknown error'}
-          </div>
-        );
+      } catch (_error) {
+        // If JSON parsing fails, fall through to raw output
       }
     }
 
+    // Default: render as raw output
     return <pre className="raw-output">{data}</pre>;
   };
 

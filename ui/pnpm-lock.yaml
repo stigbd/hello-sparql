@@ -28,7 +28,7 @@ importers:
         version: 18.3.7(@types/react@18.3.28)
       '@vitejs/plugin-react':
         specifier: ^4.7.0
-        version: 4.7.0(vite@7.3.1(@types/node@25.3.2))
+        version: 4.7.0(vite@7.3.1(@types/node@25.3.3))
       '@vitest/coverage-v8':
         specifier: ^4.0.18
         version: 4.0.18(vitest@4.0.18)
@@ -49,7 +49,7 @@ importers:
         version: 18.3.1(react@18.3.1)
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.3.2)(@vitest/ui@4.0.18)(happy-dom@20.7.0)(jsdom@28.1.0)
+        version: 4.0.18(@types/node@25.3.3)(@vitest/ui@4.0.18)(happy-dom@20.7.0)(jsdom@28.1.0)
 
   apps/web:
     dependencies:
@@ -329,8 +329,8 @@ packages:
     peerDependencies:
       '@csstools/css-tokenizer': ^4.0.0
 
-  '@csstools/css-syntax-patches-for-csstree@1.0.28':
-    resolution: {integrity: sha512-1NRf1CUBjnr3K7hu8BLxjQrKCxEe8FP/xmPTenAxCRZWVLbmGotkFvG9mfNpjA6k7Bw1bw4BilZq9cu19RA5pg==}
+  '@csstools/css-syntax-patches-for-csstree@1.0.29':
+    resolution: {integrity: sha512-jx9GjkkP5YHuTmko2eWAvpPnb0mB4mGRr2U7XwVNwevm8nlpobZEVk+GNmiYMk2VuA75v+plfXWyroWKmICZXg==}
 
   '@csstools/css-tokenizer@4.0.0':
     resolution: {integrity: sha512-QxULHAm7cNu72w97JUNCBFODFaXpbDg+dP8b/oWFAZ2MTRppA3U00Y2L1HqaS4J6yBqxwa/Y3nMBaxVKbB/NsA==}
@@ -866,8 +866,8 @@ packages:
   '@types/node@20.19.35':
     resolution: {integrity: sha512-Uarfe6J91b9HAUXxjvSOdiO2UPOKLm07Q1oh0JHxoZ1y8HoqxDAu3gVrsrOHeiio0kSsoVBt4wFrKOm0dKxVPQ==}
 
-  '@types/node@25.3.2':
-    resolution: {integrity: sha512-RpV6r/ij22zRRdyBPcxDeKAzH43phWVKEjL2iksqo1Vz3CuBUrgmPpPhALKiRfU7OMCmeeO9vECBMsV0hMTG8Q==}
+  '@types/node@25.3.3':
+    resolution: {integrity: sha512-DpzbrH7wIcBaJibpKo9nnSQL0MTRdnWttGyE5haGwK86xgMOkFLp7vEyfQPGLOJh5wNYiJ3V9PmUMDhV9u8kkQ==}
 
   '@types/prop-types@15.7.15':
     resolution: {integrity: sha512-F6bEyamV9jKGAFBEmlQnesRPGOQqS2+Uwi0Em15xenOxHaf2hv6L8YCVn3rPdPJOiJfPiCnLIRyvwVaqMY3MIw==}
@@ -991,8 +991,8 @@ packages:
   css.escape@1.5.1:
     resolution: {integrity: sha512-YUifsXXuknHlUsmlgyY0PKzgPOr7/FjCePfHNt0jxm83wHZi44VDMQ7/fGNkjY3/jV1MC+1CmZbaHzugyeRtpg==}
 
-  cssstyle@6.1.0:
-    resolution: {integrity: sha512-Ml4fP2UT2K3CUBQnVlbdV/8aFDdlY69E+YnwJM+3VUWl08S3J8c8aRuJqCkD9Py8DHZ7zNNvsfKl8psocHZEFg==}
+  cssstyle@6.2.0:
+    resolution: {integrity: sha512-Fm5NvhYathRnXNVndkUsCCuR63DCLVVwGOOwQw782coXFi5HhkXdu289l59HlXZBawsyNccXfWRYvLzcDCdDig==}
     engines: {node: '>=20'}
 
   csstype@3.2.3:
@@ -1071,8 +1071,8 @@ packages:
   fflate@0.8.2:
     resolution: {integrity: sha512-cPJU47OaAoCbg0pBvzsgpTPhmhqI5eJjh/JIu8tPj5q+T7iLvW/JAYUqmE7KOB4R1ZyEhzBaIQpQpardBF5z8A==}
 
-  flatted@3.3.3:
-    resolution: {integrity: sha512-GX+ysw4PBCz0PzosHDepZGANEuFCMLrnRTiEy9McGjmkCQYwRq4A/X786G/fjM/+OjsWSU1ZrY5qyARZmO/uwg==}
+  flatted@3.3.4:
+    resolution: {integrity: sha512-3+mMldrTAPdta5kjX2G2J7iX4zxtnwpdA8Tr2ZSjkyPSanvbZAcy6flmtnXbEybHrDcU9641lxrMfFuUxVz9vA==}
 
   fsevents@2.3.3:
     resolution: {integrity: sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==}
@@ -1702,7 +1702,7 @@ snapshots:
     dependencies:
       '@csstools/css-tokenizer': 4.0.0
 
-  '@csstools/css-syntax-patches-for-csstree@1.0.28': {}
+  '@csstools/css-syntax-patches-for-csstree@1.0.29': {}
 
   '@csstools/css-tokenizer@4.0.0': {}
 
@@ -2032,7 +2032,7 @@ snapshots:
     dependencies:
       undici-types: 6.21.0
 
-  '@types/node@25.3.2':
+  '@types/node@25.3.3':
     dependencies:
       undici-types: 7.18.2
 
@@ -2051,7 +2051,7 @@ snapshots:
 
   '@types/ws@8.18.1':
     dependencies:
-      '@types/node': 25.3.2
+      '@types/node': 25.3.3
 
   '@vitejs/plugin-react@4.7.0(vite@5.4.21(@types/node@20.19.35))':
     dependencies:
@@ -2065,7 +2065,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@vitejs/plugin-react@4.7.0(vite@7.3.1(@types/node@25.3.2))':
+  '@vitejs/plugin-react@4.7.0(vite@7.3.1(@types/node@25.3.3))':
     dependencies:
       '@babel/core': 7.29.0
       '@babel/plugin-transform-react-jsx-self': 7.27.1(@babel/core@7.29.0)
@@ -2073,7 +2073,7 @@ snapshots:
       '@rolldown/pluginutils': 1.0.0-beta.27
       '@types/babel__core': 7.20.5
       react-refresh: 0.17.0
-      vite: 7.3.1(@types/node@25.3.2)
+      vite: 7.3.1(@types/node@25.3.3)
     transitivePeerDependencies:
       - supports-color
 
@@ -2089,7 +2089,7 @@ snapshots:
       obug: 2.1.1
       std-env: 3.10.0
       tinyrainbow: 3.0.3
-      vitest: 4.0.18(@types/node@25.3.2)(@vitest/ui@4.0.18)(happy-dom@20.7.0)(jsdom@28.1.0)
+      vitest: 4.0.18(@types/node@25.3.3)(@vitest/ui@4.0.18)(happy-dom@20.7.0)(jsdom@28.1.0)
 
   '@vitest/expect@4.0.18':
     dependencies:
@@ -2100,13 +2100,13 @@ snapshots:
       chai: 6.2.2
       tinyrainbow: 3.0.3
 
-  '@vitest/mocker@4.0.18(vite@7.3.1(@types/node@25.3.2))':
+  '@vitest/mocker@4.0.18(vite@7.3.1(@types/node@25.3.3))':
     dependencies:
       '@vitest/spy': 4.0.18
       estree-walker: 3.0.3
       magic-string: 0.30.21
     optionalDependencies:
-      vite: 7.3.1(@types/node@25.3.2)
+      vite: 7.3.1(@types/node@25.3.3)
 
   '@vitest/pretty-format@4.0.18':
     dependencies:
@@ -2129,12 +2129,12 @@ snapshots:
     dependencies:
       '@vitest/utils': 4.0.18
       fflate: 0.8.2
-      flatted: 3.3.3
+      flatted: 3.3.4
       pathe: 2.0.3
       sirv: 3.0.2
       tinyglobby: 0.2.15
       tinyrainbow: 3.0.3
-      vitest: 4.0.18(@types/node@25.3.2)(@vitest/ui@4.0.18)(happy-dom@20.7.0)(jsdom@28.1.0)
+      vitest: 4.0.18(@types/node@25.3.3)(@vitest/ui@4.0.18)(happy-dom@20.7.0)(jsdom@28.1.0)
 
   '@vitest/utils@4.0.18':
     dependencies:
@@ -2188,10 +2188,10 @@ snapshots:
 
   css.escape@1.5.1: {}
 
-  cssstyle@6.1.0:
+  cssstyle@6.2.0:
     dependencies:
       '@asamuzakjp/css-color': 5.0.1
-      '@csstools/css-syntax-patches-for-csstree': 1.0.28
+      '@csstools/css-syntax-patches-for-csstree': 1.0.29
       css-tree: 3.1.0
       lru-cache: 11.2.6
 
@@ -2293,7 +2293,7 @@ snapshots:
 
   fflate@0.8.2: {}
 
-  flatted@3.3.3: {}
+  flatted@3.3.4: {}
 
   fsevents@2.3.3:
     optional: true
@@ -2302,7 +2302,7 @@ snapshots:
 
   happy-dom@20.7.0:
     dependencies:
-      '@types/node': 25.3.2
+      '@types/node': 25.3.3
       '@types/whatwg-mimetype': 3.0.2
       '@types/ws': 8.18.1
       entities: 7.0.1
@@ -2363,7 +2363,7 @@ snapshots:
       '@asamuzakjp/dom-selector': 6.8.1
       '@bramus/specificity': 2.4.2
       '@exodus/bytes': 1.14.1
-      cssstyle: 6.1.0
+      cssstyle: 6.2.0
       data-urls: 7.0.0
       decimal.js: 10.6.0
       html-encoding-sniffer: 6.0.0
@@ -2590,7 +2590,7 @@ snapshots:
       '@types/node': 20.19.35
       fsevents: 2.3.3
 
-  vite@7.3.1(@types/node@25.3.2):
+  vite@7.3.1(@types/node@25.3.3):
     dependencies:
       esbuild: 0.27.3
       fdir: 6.5.0(picomatch@4.0.3)
@@ -2599,13 +2599,13 @@ snapshots:
       rollup: 4.59.0
       tinyglobby: 0.2.15
     optionalDependencies:
-      '@types/node': 25.3.2
+      '@types/node': 25.3.3
       fsevents: 2.3.3
 
-  vitest@4.0.18(@types/node@25.3.2)(@vitest/ui@4.0.18)(happy-dom@20.7.0)(jsdom@28.1.0):
+  vitest@4.0.18(@types/node@25.3.3)(@vitest/ui@4.0.18)(happy-dom@20.7.0)(jsdom@28.1.0):
     dependencies:
       '@vitest/expect': 4.0.18
-      '@vitest/mocker': 4.0.18(vite@7.3.1(@types/node@25.3.2))
+      '@vitest/mocker': 4.0.18(vite@7.3.1(@types/node@25.3.3))
       '@vitest/pretty-format': 4.0.18
       '@vitest/runner': 4.0.18
       '@vitest/snapshot': 4.0.18
@@ -2622,10 +2622,10 @@ snapshots:
       tinyexec: 1.0.2
       tinyglobby: 0.2.15
       tinyrainbow: 3.0.3
-      vite: 7.3.1(@types/node@25.3.2)
+      vite: 7.3.1(@types/node@25.3.3)
       why-is-node-running: 2.3.0
     optionalDependencies:
-      '@types/node': 25.3.2
+      '@types/node': 25.3.3
       '@vitest/ui': 4.0.18(vitest@4.0.18)
       happy-dom: 20.7.0
       jsdom: 28.1.0

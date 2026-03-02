@@ -80,7 +80,7 @@ describe('SPARQLClient', () => {
 
       const result = await client.executeQuery({
         query: 'SELECT * WHERE { ?s ?p ?o }',
-        data: '@prefix ex: <http://example.org/>.',
+        data: '@prefix ex: <http://example.org#>.',
       });
 
       expect(result).toEqual(mockResponse);
@@ -92,13 +92,13 @@ describe('SPARQLClient', () => {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            Accept: 'text/plain',
+            Accept: 'application/sparql-results+json',
           },
         })
       );
     });
 
-    it('executes query with JSON format', async () => {
+    it('executes query with SPARQL JSON format', async () => {
       const mockResponse = { length: 0, result: '{"results":[]}' };
       mockFetch.mockResolvedValue({
         ok: true,
@@ -110,7 +110,7 @@ describe('SPARQLClient', () => {
           query: 'SELECT * WHERE { ?s ?p ?o }',
           data: '@prefix ex: <http://example.org/>.',
         },
-        'json'
+        'sparql-json'
       );
 
       expect(result).toEqual(mockResponse);
@@ -120,7 +120,7 @@ describe('SPARQLClient', () => {
         expect.objectContaining({
           headers: {
             'Content-Type': 'application/json',
-            Accept: 'application/json',
+            Accept: 'application/sparql-results+json',
           },
         })
       );
@@ -136,7 +136,7 @@ describe('SPARQLClient', () => {
       const result = await client.executeQuery(
         {
           query: 'SELECT * WHERE { ?s ?p ?o }',
-          data: '@prefix ex: <http://example.org/>.',
+          data: '@prefix ex: <http://example.org#>.',
         },
         'csv'
       );
@@ -154,7 +154,7 @@ describe('SPARQLClient', () => {
       );
     });
 
-    it('executes query with XML format', async () => {
+    it('executes query with SPARQL XML format', async () => {
       const mockResponse = { length: 0, result: '<results></results>' };
       mockFetch.mockResolvedValue({
         ok: true,
@@ -166,7 +166,7 @@ describe('SPARQLClient', () => {
           query: 'SELECT * WHERE { ?s ?p ?o }',
           data: '@prefix ex: <http://example.org/>.',
         },
-        'xml'
+        'sparql-xml'
       );
 
       expect(result).toEqual(mockResponse);
@@ -176,7 +176,7 @@ describe('SPARQLClient', () => {
         expect.objectContaining({
           headers: {
             'Content-Type': 'application/json',
-            Accept: 'text/xml',
+            Accept: 'application/sparql-results+xml',
           },
         })
       );
@@ -190,14 +190,14 @@ describe('SPARQLClient', () => {
 
       await client.executeQuery({
         query: 'SELECT * WHERE { ?s ?p ?o }',
-        data: '@prefix ex: <http://example.org/>.',
+        data: '@prefix ex: <http://example.org#>.',
       });
 
       const callArgs = mockFetch.mock.calls[0][1];
       expect(callArgs.body).toBe(
         JSON.stringify({
           query: 'SELECT * WHERE { ?s ?p ?o }',
-          data: '@prefix ex: <http://example.org/>.',
+          data: '@prefix ex: <http://example.org#>.',
           inference: false,
         })
       );
@@ -212,7 +212,7 @@ describe('SPARQLClient', () => {
 
       await client.executeQuery({
         query: 'SELECT * WHERE { ?s ?p ?o }',
-        data: '@prefix ex: <http://example.org/>.',
+        data: '@prefix ex: <http://example.org#>.',
         inference: true,
       });
 
@@ -220,7 +220,7 @@ describe('SPARQLClient', () => {
       expect(callArgs.body).toBe(
         JSON.stringify({
           query: 'SELECT * WHERE { ?s ?p ?o }',
-          data: '@prefix ex: <http://example.org/>.',
+          data: '@prefix ex: <http://example.org#>.',
           inference: true,
         })
       );
@@ -234,7 +234,7 @@ describe('SPARQLClient', () => {
 
       await client.executeQuery({
         query: 'SELECT * WHERE { ?s ?p ?o }',
-        data: '@prefix ex: <http://example.org/>.',
+        data: '@prefix ex: <http://example.org#>.',
       });
 
       const callArgs = mockFetch.mock.calls[0][1];

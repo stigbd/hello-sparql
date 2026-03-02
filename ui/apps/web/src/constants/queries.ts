@@ -3,22 +3,34 @@ import type { QueryTemplate } from '@hello-sparql/types';
 export const QUERY_TEMPLATES: Record<string, QueryTemplate> = {
   select: {
     type: 'select',
-    label: 'Basic Select',
+    label: 'Select Query',
     query: `PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-PREFIX ex: <http://example.org/>
+PREFIX ex: <http://example.org#>
 
 SELECT ?s ?p ?o
 WHERE {
     ?s ?p ?o .
 }`,
   },
-  ask: {
-    type: 'ask',
-    label: 'Basic Ask',
+  count: {
+    type: 'select',
+    label: 'Count Query',
     query: `PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-PREFIX ex: <http://example.org/>
+PREFIX ex: <http://example.org#>
+
+SELECT (COUNT(*) AS ?count)
+WHERE {
+    ?s ?p ?o .
+}`,
+  },
+  ask: {
+    type: 'ask',
+    label: 'Ask Query',
+    query: `PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX ex: <http://example.org#>
 
 ASK
 WHERE
@@ -26,28 +38,29 @@ WHERE
     ?s ?p ?o .
 }`,
   },
-  count: {
-    type: 'count',
-    label: 'Count Query',
+  describe: {
+    type: 'describe',
+    label: 'Describe Query',
     query: `PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-PREFIX ex: <http://example.org/>
+PREFIX ex: <http://example.org#>
 
-SELECT (COUNT(*) AS ?count)
+DESCRIBE ?s ?p ?o
 WHERE {
     ?s ?p ?o .
 }`,
   },
   construct: {
     type: 'construct',
-    label: 'Basic Construct',
+    label: 'Construct Query',
     query: `PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-PREFIX ex: <http://example.org/>
+PREFIX ex: <http://example.org#>
 
 CONSTRUCT {
     ?s ?p ?o .
-} WHERE {
+}
+WHERE {
     ?s ?p ?o .
 }`,
   },
@@ -55,7 +68,7 @@ CONSTRUCT {
 
 export const INITIAL_DATA = `@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
-@prefix ex: <http://example.org/>.
+@prefix ex: <http://example.org#>.
 
 ex:John rdf:type ex:Person ;
         ex:name "John" ;
