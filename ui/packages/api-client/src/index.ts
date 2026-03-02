@@ -33,7 +33,7 @@ export class SPARQLClient {
 
   async executeQuery(
     request: SPARQLQueryRequest,
-    format: SerializationFormat = 'txt'
+    format: SerializationFormat = 'sparql-json'
   ): Promise<SPARQLResponse> {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), this.timeout);
@@ -99,14 +99,20 @@ export class SPARQLClient {
 
   private getAcceptHeader(format: SerializationFormat): string {
     switch (format) {
-      case 'json':
-        return 'application/json';
+      case 'sparql-json':
+        return 'application/sparql-results+json';
       case 'csv':
         return 'text/csv';
-      case 'xml':
-        return 'text/xml';
+      case 'sparql-xml':
+        return 'application/sparql-results+xml';
+      case 'turtle':
+        return 'text/turtle';
+      case 'json-ld':
+        return 'application/ld+json';
+      case 'rdf-xml':
+        return 'application/rdf+xml';
       default:
-        return 'text/plain';
+        return 'application/sparql-results+json';
     }
   }
 }

@@ -1,19 +1,88 @@
-import type { SerializationFormat } from '@hello-sparql/types';
+import type { QueryType, SerializationFormat } from '@hello-sparql/types';
 import { CodeEditor, LoadingSpinner, ResultsTable } from '@hello-sparql/ui';
 import type React from 'react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { DEFAULT_QUERY, INITIAL_DATA, QUERY_TEMPLATES } from '../constants/queries';
 import { useSPARQLQuery } from '../hooks/useSPARQLQuery';
+
+// Utility function to detect query type from query string
+const detectQueryType = (query: string): QueryType => {
+  const upperQuery = query.trim().toUpperCase();
+
+  // Remove PREFIX declarations to get to the actual query type
+  const queryWithoutPrefixes = upperQuery.replace(/PREFIX\s+\w+:\s*<[^>]+>\s*/g, '').trim();
+
+  // Check CONSTRUCT and DESCRIBE first since they may contain SELECT in WHERE clause
+  if (queryWithoutPrefixes.startsWith('CONSTRUCT')) return 'construct';
+  if (queryWithoutPrefixes.startsWith('DESCRIBE')) return 'describe';
+  if (queryWithoutPrefixes.startsWith('ASK')) return 'ask';
+  if (queryWithoutPrefixes.startsWith('SELECT')) return 'select';
+  return 'select'; // default
+};
+
+// Format options based on query type
+const getAvailableFormats = (queryType: QueryType): SerializationFormat[] => {
+  if (queryType === 'select' || queryType === 'ask') {
+    return ['sparql-json', 'csv', 'sparql-xml'];
+  }
+  // describe or construct
+  return ['turtle', 'json-ld', 'rdf-xml'];
+};
+
+// Get default format for query type
+const getDefaultFormat = (queryType: QueryType): SerializationFormat => {
+  if (queryType === 'select' || queryType === 'ask') {
+    return 'sparql-json';
+  }
+  return 'turtle';
+};
+
+// Get display label for format
+const getFormatLabel = (format: SerializationFormat): string => {
+  switch (format) {
+    case 'sparql-json':
+      return 'SPARQL JSON';
+    case 'csv':
+      return 'CSV';
+    case 'sparql-xml':
+      return 'SPARQL XML';
+    case 'turtle':
+      return 'Turtle';
+    case 'json-ld':
+      return 'JSON-LD';
+    case 'rdf-xml':
+      return 'RDF/XML';
+    default:
+      return format;
+  }
+};
 
 export const QueryExplorer: React.FC = () => {
   const [query, setQuery] = useState<string>(DEFAULT_QUERY);
   const [data, setData] = useState<string>(INITIAL_DATA);
-  const [selectedFormat, setSelectedFormat] = useState<SerializationFormat>('txt');
+  const [queryType, setQueryType] = useState<QueryType>('select');
+  const [selectedFormat, setSelectedFormat] = useState<SerializationFormat>('sparql-json');
   const [inference, setInference] = useState<boolean>(false);
   const [result, setResult] = useState<string>('');
   const [duration, setDuration] = useState<number>(0);
   const [length, setLength] = useState<number>(0);
   const [errorMessage, setErrorMessage] = useState<string>('');
+
+  // Detect query type when query changes (but only when typing, not when using templates)
+  useEffect(() => {
+    const detectedType = detectQueryType(query);
+
+    // Only update if the detected type is different from current type
+    if (detectedType !== queryType) {
+      setQueryType(detectedType);
+
+      // If current format is not valid for the new query type, switch to default
+      const availableFormats = getAvailableFormats(detectedType);
+      if (!availableFormats.includes(selectedFormat)) {
+        setSelectedFormat(getDefaultFormat(detectedType));
+      }
+    }
+  }, [query, queryType, selectedFormat]);
 
   const { executeQuery, isLoading } = useSPARQLQuery({
     onSuccess: (data, executionDuration, resultLength) => {
@@ -43,6 +112,10 @@ export const QueryExplorer: React.FC = () => {
   const handleTemplateChange = (templateKey: string) => {
     const template = QUERY_TEMPLATES[templateKey];
     if (template) {
+      // Batch all state updates together to ensure they happen synchronously
+      const newFormat = getDefaultFormat(template.type);
+      setQueryType(template.type);
+      setSelectedFormat(newFormat);
       setQuery(template.query);
     }
   };
@@ -317,10 +390,11 @@ export const QueryExplorer: React.FC = () => {
             value={selectedFormat}
             onChange={(e) => setSelectedFormat(e.target.value as SerializationFormat)}
           >
-            <option value="txt">Text (Table)</option>
-            <option value="json">JSON</option>
-            <option value="csv">CSV</option>
-            <option value="xml">XML</option>
+            {getAvailableFormats(queryType).map((format) => (
+              <option key={format} value={format}>
+                {getFormatLabel(format)}
+              </option>
+            ))}
           </select>
         </div>
 

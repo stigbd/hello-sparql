@@ -707,7 +707,7 @@ export const QUERY_TEMPLATES: Record<string, QueryTemplate> = {
     label: 'Basic Select',
     query: `PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-PREFIX ex: <http://example.org/>
+PREFIX ex: <http://example.org#>
 
 SELECT ?s ?p ?o
 WHERE {
@@ -719,7 +719,7 @@ WHERE {
     label: 'Count Query',
     query: `PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-PREFIX ex: <http://example.org/>
+PREFIX ex: <http://example.org#>
 
 SELECT (COUNT(*) AS ?count)
 WHERE {
@@ -731,7 +731,7 @@ WHERE {
     label: 'Basic Construct',
     query: `PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-PREFIX ex: <http://example.org/>
+PREFIX ex: <http://example.org#>
 
 CONSTRUCT {
     ?s ?p ?o .
@@ -743,7 +743,7 @@ CONSTRUCT {
 
 export const INITIAL_DATA = `@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
-@prefix ex: <http://example.org/>.
+@prefix ex: <http://example.org#>.
 
 ex:John rdf:type ex:Person ;
         ex:name "John" ;

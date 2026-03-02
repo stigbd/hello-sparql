@@ -18,7 +18,7 @@ def anyio_backend() -> str:
 async def test_shacl_with_valid_data_and_shapes() -> None:
     """Should return 200 OK and text body."""
     data = r"""
-    @prefix ex: <http://example.org/> .
+    @prefix ex: <http://example.org#> .
     @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
     @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 
@@ -32,7 +32,7 @@ async def test_shacl_with_valid_data_and_shapes() -> None:
     @prefix rdfs:	<http://www.w3.org/2000/01/rdf-schema#> .
     @prefix sh:	<http://www.w3.org/ns/shacl#> .
     @prefix xsd:	<http://www.w3.org/2001/XMLSchema#> .
-    @prefix ex: <http://example.org/> .
+    @prefix ex: <http://example.org#> .
 
     ex:PersonShape
 	a sh:NodeShape ;
@@ -67,7 +67,7 @@ async def test_shacl_with_valid_data_and_shapes() -> None:
 async def test_shacl_with_invalid_data_and_valid_shapes() -> None:
     """Should return 400 Bad Request and text body."""
     invalid_data = r"""
-    @prefix ex: <http://example.org/> .
+    @prefix ex: <http://example.org#> .
     @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
     @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 
@@ -79,7 +79,7 @@ async def test_shacl_with_invalid_data_and_valid_shapes() -> None:
     @prefix rdfs:	<http://www.w3.org/2000/01/rdf-schema#> .
     @prefix sh:	<http://www.w3.org/ns/shacl#> .
     @prefix xsd:	<http://www.w3.org/2001/XMLSchema#> .
-    @prefix ex: <http://example.org/> .
+    @prefix ex: <http://example.org#> .
 
     ex:PersonShape
 	a sh:NodeShape ;
@@ -113,7 +113,7 @@ async def test_shacl_with_invalid_data_and_valid_shapes() -> None:
 async def test_shacl_with_valid_data_and_invalid_shapes() -> None:
     """Should return 200 OK and text body."""
     data = r"""
-    @prefix ex: <http://example.org/> .
+    @prefix ex: <http://example.org#> .
     @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
     @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 
@@ -127,7 +127,7 @@ async def test_shacl_with_valid_data_and_invalid_shapes() -> None:
     @prefix rdfs:	<http://www.w3.org/2000/01/rdf-schema#> .
     @prefix sh:	<http://www.w3.org/ns/shacl#> .
     @prefix xsd:	<http://www.w3.org/2001/XMLSchema#> .
-    @prefix ex: <http://example.org/> .
+    @prefix ex: <http://example.org#> .
 
     invalid_shapes
 	"""
@@ -139,3 +139,51 @@ async def test_shacl_with_valid_data_and_invalid_shapes() -> None:
             "/shacl", headers=headers, json={"shapes": shapes, "data": data}
         )
     assert response.status_code == HTTPStatus.BAD_REQUEST, response.json()
+
+
+@pytest.mark.anyio
+async def test_shacl_with_unsupported_content_type() -> None:
+    """Should return 415 Unsupported Media Type and json body."""
+    headers = {"Content-Type": "unsupported"}
+    data = r"""
+    @prefix ex: <http://example.org#> .
+    @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+    @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+    ex:Alice
+	a ex:Person ;
+	ex:ssn "987-65-432A" .
+	"""
+
+    shapes = r"""
+    @prefix rdf:	<http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+    @prefix rdfs:	<http://www.w3.org/2000/01/rdf-schema#> .
+    @prefix sh:	<http://www.w3.org/ns/shacl#> .
+    @prefix xsd:	<http://www.w3.org/2001/XMLSchema#> .
+    @prefix ex: <http://example.org#> .
+
+    ex:PersonShape
+	a sh:NodeShape ;
+	sh:targetClass ex:Person ;    # Applies to all persons
+	sh:property [                 # _:b1
+		sh:path ex:ssn ;           # constrains the values of ex:ssn
+		sh:maxCount 1 ;
+		sh:datatype xsd:string ;
+		sh:pattern "^\\d{3}-\\d{2}-\\d{4}$" ;
+	] ;
+    sh:property [                 # _:b2
+        sh:path ex:worksFor ;
+		sh:class ex:Company ;
+		sh:nodeKind sh:IRI ;
+	] ;
+	sh:closed true ;
+	sh:ignoredProperties ( rdf:type ) .
+	"""
+
+    async with AsyncClient(
+        transport=ASGITransport(app=app), base_url="http://test"
+    ) as ac:
+        response = await ac.post(
+            "/shacl", headers=headers, json={"shapes": shapes, "data": data}
+        )
+    assert response.status_code == HTTPStatus.UNSUPPORTED_MEDIA_TYPE, response.json()

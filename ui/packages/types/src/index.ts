@@ -21,7 +21,7 @@ export interface SPARQLError {
   detail: string;
 }
 
-export type QueryType = 'select' | 'ask' | 'construct' | 'count';
+export type QueryType = 'select' | 'ask' | 'describe' | 'construct';
 
 export interface QueryTemplate {
   type: QueryType;
@@ -34,7 +34,13 @@ export interface EditorState {
   data: string;
 }
 
-export type SerializationFormat = 'txt' | 'json' | 'csv' | 'xml';
+export type SerializationFormat =
+  | 'sparql-json' // application/sparql-results+json (SELECT/ASK)
+  | 'csv' // text/csv (SELECT/ASK)
+  | 'sparql-xml' // application/sparql-results+xml (SELECT/ASK)
+  | 'turtle' // text/turtle (DESCRIBE/CONSTRUCT)
+  | 'json-ld' // application/ld+json (DESCRIBE/CONSTRUCT)
+  | 'rdf-xml'; // application/rdf+xml (DESCRIBE/CONSTRUCT)
 
 export interface QueryExecutionResult {
   data: string;

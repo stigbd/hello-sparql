@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import * as useSPARQLQueryModule from '../../hooks/useSPARQLQuery';
@@ -274,9 +274,55 @@ describe('QueryExplorer', () => {
     );
 
     const formatSelector = screen.getByLabelText('Result Format:');
-    await user.selectOptions(formatSelector, 'json');
+    await user.selectOptions(formatSelector, 'csv');
 
-    expect((formatSelector as HTMLSelectElement).value).toBe('json');
+    expect((formatSelector as HTMLSelectElement).value).toBe('csv');
+  });
+
+  it('changes result format when query template changes to different query type', async () => {
+    const user = userEvent.setup();
+    const Wrapper = createWrapper();
+
+    render(
+      <Wrapper>
+        <QueryExplorer />
+      </Wrapper>
+    );
+
+    const templateSelector = screen.getByLabelText('Query Template:');
+
+    // Change to CONSTRUCT query
+    await user.selectOptions(templateSelector, 'construct');
+
+    // Wait for the format selector to update with RDF formats
+    await waitFor(() => {
+      const formatSelector = screen.getByLabelText('Result Format:');
+      const options = Array.from(formatSelector.querySelectorAll('option'));
+      const optionValues = options.map((opt) => (opt as HTMLOptionElement).value);
+
+      // Check that the available options have changed to RDF formats
+      expect(optionValues).toContain('turtle');
+      expect(optionValues).toContain('json-ld');
+      expect(optionValues).toContain('rdf-xml');
+      expect(optionValues).not.toContain('sparql-json');
+
+      // And that turtle is selected as the default
+      expect((formatSelector as HTMLSelectElement).value).toBe('turtle');
+    });
+
+    // Change to ASK query (should have SELECT/ASK formats)
+    await user.selectOptions(templateSelector, 'ask');
+
+    await waitFor(() => {
+      const formatSelector = screen.getByLabelText('Result Format:');
+      const options = Array.from(formatSelector.querySelectorAll('option'));
+      const optionValues = options.map((opt) => (opt as HTMLOptionElement).value);
+
+      // Check that the available options have changed back to result set formats
+      expect(optionValues).toContain('sparql-json');
+      expect(optionValues).toContain('csv');
+      expect(optionValues).not.toContain('turtle');
+    });
   });
 
   it('updates query when user types in query editor', async () => {
@@ -313,7 +359,7 @@ describe('QueryExplorer', () => {
     const dataTextarea = textareas[1];
 
     await user.clear(dataTextarea);
-    await user.type(dataTextarea, '@prefix ex: <http://example.org/>.');
+    await user.type(dataTextarea, '@prefix ex: <http://example.org#>.');
 
     expect((dataTextarea as HTMLTextAreaElement).value).toContain('@prefix ex:');
   });
@@ -352,10 +398,10 @@ describe('QueryExplorer', () => {
     const options = Array.from(formatSelector.querySelectorAll('option'));
     const optionValues = options.map((opt) => (opt as HTMLOptionElement).value);
 
-    expect(optionValues).toContain('txt');
-    expect(optionValues).toContain('json');
+    // Default query is SELECT, so should show SELECT/ASK formats
+    expect(optionValues).toContain('sparql-json');
     expect(optionValues).toContain('csv');
-    expect(optionValues).toContain('xml');
+    expect(optionValues).toContain('sparql-xml');
   });
 
   it('has all query template options available', () => {
@@ -476,7 +522,7 @@ describe('QueryExplorer', () => {
       request: expect.objectContaining({
         inference: true,
       }),
-      format: 'txt',
+      format: 'sparql-json',
     });
   });
 
@@ -498,7 +544,7 @@ describe('QueryExplorer', () => {
       request: expect.objectContaining({
         inference: false,
       }),
-      format: 'txt',
+      format: 'sparql-json',
     });
   });
 

@@ -4,7 +4,7 @@ import { ResultsTable } from '../ResultsTable';
 
 describe('ResultsTable', () => {
   it('renders without crashing', () => {
-    render(<ResultsTable data="" format="txt" />);
+    render(<ResultsTable data="" format="sparql-json" />);
     expect(document.querySelector('.results-container')).toBeInTheDocument();
   });
 
@@ -14,7 +14,7 @@ describe('ResultsTable', () => {
 | ex:John | rdf:type | ex:Person |
 | ex:Jane | rdf:type | ex:Person |`;
 
-    render(<ResultsTable data={tableData} format="txt" />);
+    render(<ResultsTable data={tableData} format="sparql-json" />);
 
     const table = screen.getByRole('table');
     expect(table).toBeInTheDocument();
@@ -32,7 +32,7 @@ describe('ResultsTable', () => {
 | John | 30 |
 | Jane | 25 |`;
 
-    render(<ResultsTable data={tableData} format="txt" />);
+    render(<ResultsTable data={tableData} format="sparql-json" />);
 
     const rows = screen.getAllByRole('row');
     // 1 header row + 2 data rows
@@ -45,12 +45,12 @@ describe('ResultsTable', () => {
   });
 
   it('shows "No results" for empty text data', () => {
-    render(<ResultsTable data="" format="txt" />);
+    render(<ResultsTable data="" format="sparql-json" />);
     expect(screen.getByText('No results')).toBeInTheDocument();
   });
 
   it('shows "No results" for whitespace-only text data', () => {
-    render(<ResultsTable data="   \n  \n  " format="txt" />);
+    render(<ResultsTable data="   \n  \n  " format="sparql-json" />);
     // Whitespace lines are not filtered as empty, so they show as raw output
     const pre = document.querySelector('.raw-output');
     expect(pre).toBeInTheDocument();
@@ -58,7 +58,7 @@ describe('ResultsTable', () => {
 
   it('renders JSON format correctly', () => {
     const jsonData = JSON.stringify({ results: [{ name: 'John' }, { name: 'Jane' }] }, null, 2);
-    render(<ResultsTable data={jsonData} format="json" />);
+    render(<ResultsTable data={jsonData} format="sparql-json" />);
 
     const pre = document.querySelector('.json-output');
     expect(pre).toBeInTheDocument();
@@ -68,9 +68,12 @@ describe('ResultsTable', () => {
 
   it('handles invalid JSON gracefully', () => {
     const invalidJson = '{ invalid json }';
-    render(<ResultsTable data={invalidJson} format="json" />);
+    render(<ResultsTable data={invalidJson} format="sparql-json" />);
 
-    expect(screen.getByText(/Failed to parse JSON/)).toBeInTheDocument();
+    // Invalid JSON should fall back to raw output
+    const pre = document.querySelector('.raw-output');
+    expect(pre).toBeInTheDocument();
+    expect(pre?.textContent).toBe(invalidJson);
   });
 
   it('renders CSV format as raw output', () => {
@@ -84,7 +87,7 @@ describe('ResultsTable', () => {
 
   it('renders XML format as raw output', () => {
     const xmlData = '<result><name>John</name></result>';
-    render(<ResultsTable data={xmlData} format="xml" />);
+    render(<ResultsTable data={xmlData} format="sparql-xml" />);
 
     const pre = document.querySelector('.raw-output');
     expect(pre).toBeInTheDocument();
@@ -92,7 +95,7 @@ describe('ResultsTable', () => {
   });
 
   it('applies custom className', () => {
-    render(<ResultsTable data="" format="txt" className="custom-results" />);
+    render(<ResultsTable data="" format="sparql-json" className="custom-results" />);
     const container = document.querySelector('.results-container');
     expect(container).toHaveClass('custom-results');
   });
@@ -102,7 +105,7 @@ describe('ResultsTable', () => {
 |---|---|
 | data1 | data2 |`;
 
-    render(<ResultsTable data={tableData} format="txt" />);
+    render(<ResultsTable data={tableData} format="sparql-json" />);
 
     const tableContainer = document.querySelector('.table-container');
     expect(tableContainer).toBeInTheDocument();
@@ -111,7 +114,7 @@ describe('ResultsTable', () => {
 
   it('handles non-pipe text format as raw output', () => {
     const rawText = 'Some plain text without pipes';
-    render(<ResultsTable data={rawText} format="txt" />);
+    render(<ResultsTable data={rawText} format="sparql-json" />);
 
     const pre = document.querySelector('.raw-output');
     expect(pre).toBeInTheDocument();
@@ -123,7 +126,7 @@ describe('ResultsTable', () => {
 |---|---|---|---|
 | | John | 30 | |`;
 
-    render(<ResultsTable data={tableData} format="txt" />);
+    render(<ResultsTable data={tableData} format="sparql-json" />);
 
     const headers = screen.getAllByRole('columnheader');
     // Should only show non-empty headers
@@ -132,7 +135,7 @@ describe('ResultsTable', () => {
 
   it('renders JSON with pretty formatting', () => {
     const jsonData = '{"name":"John","age":30}';
-    render(<ResultsTable data={jsonData} format="json" />);
+    render(<ResultsTable data={jsonData} format="sparql-json" />);
 
     const pre = document.querySelector('.json-output');
     expect(pre?.textContent).toContain('\n'); // Should have newlines from pretty print
@@ -147,7 +150,7 @@ describe('ResultsTable', () => {
 | ex:Jane | rdf:type | ex:Person |
 | ex:Jane | ex:name | "Jane" |`;
 
-    render(<ResultsTable data={tableData} format="txt" />);
+    render(<ResultsTable data={tableData} format="sparql-json" />);
 
     const rows = screen.getAllByRole('row');
     // 1 header row + 5 data rows
@@ -159,7 +162,7 @@ describe('ResultsTable', () => {
 |---|---|
 | data1 | data2 |`;
 
-    render(<ResultsTable data={tableData} format="txt" />);
+    render(<ResultsTable data={tableData} format="sparql-json" />);
 
     const table = screen.getByRole('table');
     expect(table).toHaveClass('results-table');
@@ -169,7 +172,7 @@ describe('ResultsTable', () => {
     const tableData = `| name | age |
 |---|---|`;
 
-    render(<ResultsTable data={tableData} format="txt" />);
+    render(<ResultsTable data={tableData} format="sparql-json" />);
 
     const table = screen.getByRole('table');
     expect(table).toBeInTheDocument();
