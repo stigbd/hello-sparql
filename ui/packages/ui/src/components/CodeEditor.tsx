@@ -1,5 +1,11 @@
+import Prism from 'prismjs';
 import type React from 'react';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+// Import theme
+import 'prismjs/themes/prism-okaidia.css';
+// Import languages
+import 'prismjs/components/prism-turtle';
+import 'prismjs/components/prism-sparql';
 
 export interface CodeEditorProps {
   value: string;
@@ -14,21 +20,62 @@ export interface CodeEditorProps {
 export const CodeEditor: React.FC<CodeEditorProps> = ({
   value,
   onChange,
-  language: _language = 'turtle', // Reserved for future syntax highlighting feature
+  language = 'turtle',
   placeholder = '',
   readOnly = false,
   className = '',
   minHeight = '300px',
 }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const preRef = useRef<HTMLPreElement>(null);
+  const [highlightedCode, setHighlightedCode] = useState('');
 
+  // Map language names to Prism identifiers
+  const getPrismLanguage = (lang: string): string => {
+    const languageMap: Record<string, string> = {
+      turtle: 'turtle',
+      sparql: 'sparql',
+      ttl: 'turtle',
+      rdf: 'turtle',
+    };
+    return languageMap[lang.toLowerCase()] || 'turtle';
+  };
+
+  const prismLanguage = getPrismLanguage(language);
+
+  // Highlight the code using Prism
   useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+    const highlight = () => {
+      try {
+        if (value) {
+          const grammar = Prism.languages[prismLanguage];
+          if (grammar) {
+            const highlighted = Prism.highlight(value, grammar, prismLanguage);
+            console.log('Prism highlighted code:', `${highlighted.substring(0, 100)}...`);
+            setHighlightedCode(highlighted);
+          } else {
+            console.warn('Grammar not found for language:', prismLanguage);
+            setHighlightedCode(value);
+          }
+        } else {
+          setHighlightedCode('');
+        }
+      } catch (error) {
+        console.warn('Syntax highlighting error:', error);
+        setHighlightedCode(value);
+      }
+    };
+
+    highlight();
+  }, [value, prismLanguage]);
+
+  // Sync scroll between textarea and pre element
+  const handleScroll = () => {
+    if (textareaRef.current && preRef.current) {
+      preRef.current.scrollTop = textareaRef.current.scrollTop;
+      preRef.current.scrollLeft = textareaRef.current.scrollLeft;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     onChange(e.target.value);
@@ -52,17 +99,55 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   };
 
   return (
-    <div className={`code-editor ${className}`}>
+    <div className={`code-editor ${className}`} style={{ position: 'relative', minHeight }}>
+      {/* Syntax highlighted overlay - must render first (background layer) */}
+      <pre
+        ref={preRef}
+        className={`language-${prismLanguage}`}
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          margin: 0,
+          padding: '12px',
+          minHeight,
+          fontFamily: 'Monaco, Menlo, "Ubuntu Mono", Consolas, source-code-pro, monospace',
+          fontSize: '14px',
+          lineHeight: '1.5',
+          border: '1px solid transparent',
+          borderRadius: '6px',
+          backgroundColor: '#272822',
+          overflow: 'hidden',
+          pointerEvents: 'none',
+          whiteSpace: 'pre-wrap',
+          wordWrap: 'break-word',
+        }}
+        aria-hidden="true"
+      >
+        <code
+          className={`language-${prismLanguage}`}
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: Required for Prism syntax highlighting
+          dangerouslySetInnerHTML={{
+            __html: highlightedCode || `<span style="color: #75715e">${placeholder}</span>`,
+          }}
+        />
+      </pre>
+
+      {/* Textarea for user input - renders on top with transparent text */}
       <textarea
         ref={textareaRef}
         value={value}
         onChange={handleChange}
         onKeyDown={handleKeyDown}
+        onScroll={handleScroll}
         placeholder={placeholder}
         readOnly={readOnly}
         spellCheck={false}
         className="code-editor-textarea"
         style={{
+          position: 'relative',
           minHeight,
           width: '100%',
           fontFamily: 'Monaco, Menlo, "Ubuntu Mono", Consolas, source-code-pro, monospace',
@@ -71,13 +156,56 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
           padding: '12px',
           border: '1px solid #e2e8f0',
           borderRadius: '6px',
-          backgroundColor: '#f8fafc',
-          color: '#1e293b',
+          backgroundColor: 'transparent',
+          color: 'transparent',
+          caretColor: '#f8f8f2',
           resize: 'vertical',
           outline: 'none',
           boxSizing: 'border-box',
+          overflow: 'auto',
+          whiteSpace: 'pre-wrap',
+          wordWrap: 'break-word',
         }}
       />
+
+      <style>{`
+        .code-editor {
+          position: relative;
+        }
+
+        .code-editor textarea::selection {
+          background-color: rgba(255, 255, 255, 0.2);
+          color: transparent;
+        }
+
+        .code-editor textarea::-webkit-scrollbar {
+          width: 10px;
+          height: 10px;
+        }
+
+        .code-editor textarea::-webkit-scrollbar-track {
+          background: rgba(0, 0, 0, 0.1);
+          border-radius: 6px;
+        }
+
+        .code-editor textarea::-webkit-scrollbar-thumb {
+          background: rgba(255, 255, 255, 0.3);
+          border-radius: 6px;
+        }
+
+        .code-editor textarea::-webkit-scrollbar-thumb:hover {
+          background: rgba(255, 255, 255, 0.5);
+        }
+
+        .code-editor pre::-webkit-scrollbar {
+          display: none;
+        }
+
+        .code-editor textarea:focus {
+          border-color: #3b82f6;
+          box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+      `}</style>
     </div>
   );
 };
