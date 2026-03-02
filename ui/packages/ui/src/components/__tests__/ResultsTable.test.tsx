@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 import { ResultsTable } from '../ResultsTable';
 
@@ -76,22 +77,149 @@ describe('ResultsTable', () => {
     expect(pre?.textContent).toBe(invalidJson);
   });
 
-  it('renders CSV format as raw output', () => {
+  it('renders CSV format as table in formatted mode', () => {
     const csvData = 'name,age\nJohn,30\nJane,25';
     render(<ResultsTable data={csvData} format="csv" />);
+
+    // Should render as table by default
+    const table = screen.getByRole('table');
+    expect(table).toBeInTheDocument();
+
+    // Check headers
+    const headers = screen.getAllByRole('columnheader');
+    expect(headers).toHaveLength(2);
+    expect(headers[0]).toHaveTextContent('name');
+    expect(headers[1]).toHaveTextContent('age');
+
+    // Check data
+    expect(screen.getByText('John')).toBeInTheDocument();
+    expect(screen.getByText('30')).toBeInTheDocument();
+    expect(screen.getByText('Jane')).toBeInTheDocument();
+    expect(screen.getByText('25')).toBeInTheDocument();
+  });
+
+  it('renders CSV format as raw output when raw mode is selected', async () => {
+    const user = userEvent.setup();
+    const csvData = 'name,age\nJohn,30\nJane,25';
+    render(<ResultsTable data={csvData} format="csv" />);
+
+    // Click Raw button
+    const rawButton = screen.getByText('Raw');
+    await user.click(rawButton);
 
     const pre = document.querySelector('.raw-output');
     expect(pre).toBeInTheDocument();
     expect(pre?.textContent).toBe(csvData);
   });
 
-  it('renders XML format as raw output', () => {
-    const xmlData = '<result><name>John</name></result>';
+  it('shows view mode toggle buttons', () => {
+    render(<ResultsTable data="test" format="sparql-json" />);
+
+    const formattedButton = screen.getByText('Formatted');
+    const rawButton = screen.getByText('Raw');
+
+    expect(formattedButton).toBeInTheDocument();
+    expect(rawButton).toBeInTheDocument();
+
+    // Formatted should be active by default
+    expect(formattedButton).toHaveClass('active');
+    expect(rawButton).not.toHaveClass('active');
+  });
+
+  it('switches between formatted and raw views', async () => {
+    const user = userEvent.setup();
+    const jsonData = JSON.stringify({ name: 'John' });
+    render(<ResultsTable data={jsonData} format="sparql-json" />);
+
+    // Initially in formatted mode
+    expect(screen.getByText('Formatted')).toHaveClass('active');
+
+    // Switch to raw
+    await user.click(screen.getByText('Raw'));
+    expect(screen.getByText('Raw')).toHaveClass('active');
+    expect(screen.getByText('Formatted')).not.toHaveClass('active');
+
+    // Switch back to formatted
+    await user.click(screen.getByText('Formatted'));
+    expect(screen.getByText('Formatted')).toHaveClass('active');
+    expect(screen.getByText('Raw')).not.toHaveClass('active');
+  });
+
+  it('renders SPARQL JSON as pretty-printed JSON in formatted mode', () => {
+    const sparqlJson = JSON.stringify({
+      head: { vars: ['name', 'age'] },
+      results: {
+        bindings: [
+          { name: { type: 'literal', value: 'John' }, age: { type: 'literal', value: '30' } },
+          { name: { type: 'literal', value: 'Jane' }, age: { type: 'literal', value: '25' } },
+        ],
+      },
+    });
+    render(<ResultsTable data={sparqlJson} format="sparql-json" />);
+
+    // Should render as pretty-printed JSON, not a table
+    const pre = document.querySelector('.json-output');
+    expect(pre).toBeInTheDocument();
+    expect(pre?.textContent).toContain('"head"');
+    expect(pre?.textContent).toContain('"vars"');
+    expect(pre?.textContent).toContain('"results"');
+    expect(pre?.textContent).toContain('"bindings"');
+
+    // Should have pretty-printing (newlines)
+    expect(pre?.textContent).toContain('\n');
+  });
+
+  it('renders XML format as pretty-printed output in formatted view', () => {
+    const xmlData =
+      '<sparql xmlns="http://www.w3.org/2005/sparql-results#"><head><variable name="name"/></head><results><result><binding name="name"><literal>John</literal></binding></result></results></sparql>';
     render(<ResultsTable data={xmlData} format="sparql-xml" />);
+
+    const pre = document.querySelector('.xml-output');
+    expect(pre).toBeInTheDocument();
+    // Should have newlines (pretty-printed)
+    expect(pre?.textContent).toContain('\n');
+    // Should contain the original content
+    expect(pre?.textContent).toContain('sparql');
+    expect(pre?.textContent).toContain('John');
+  });
+
+  it('renders XML format as raw output when raw view is selected', async () => {
+    const user = userEvent.setup();
+    const xmlData =
+      '<sparql xmlns="http://www.w3.org/2005/sparql-results#"><head></head><results></results></sparql>';
+    render(<ResultsTable data={xmlData} format="sparql-xml" />);
+
+    // Click Raw button
+    const rawButton = screen.getByText('Raw');
+    await user.click(rawButton);
 
     const pre = document.querySelector('.raw-output');
     expect(pre).toBeInTheDocument();
     expect(pre?.textContent).toBe(xmlData);
+  });
+
+  it('pretty-prints minified SPARQL XML in formatted view', () => {
+    const minifiedXML =
+      '<?xml version="1.0"?><sparql xmlns="http://www.w3.org/2005/sparql-results#"><head><variable name="x"/><variable name="y"/></head><results><result><binding name="x"><uri>http://example.org/a</uri></binding><binding name="y"><literal>value</literal></binding></result></results></sparql>';
+    render(<ResultsTable data={minifiedXML} format="sparql-xml" />);
+
+    const pre = document.querySelector('.xml-output');
+    expect(pre).toBeInTheDocument();
+
+    // Should have newlines (indicating it's been formatted)
+    expect(pre?.textContent).toContain('\n');
+
+    // Should contain all the original elements
+    expect(pre?.textContent).toContain('sparql');
+    expect(pre?.textContent).toContain('head');
+    expect(pre?.textContent).toContain('variable');
+    expect(pre?.textContent).toContain('results');
+    expect(pre?.textContent).toContain('result');
+    expect(pre?.textContent).toContain('binding');
+    expect(pre?.textContent).toContain('uri');
+    expect(pre?.textContent).toContain('literal');
+    expect(pre?.textContent).toContain('http://example.org/a');
+    expect(pre?.textContent).toContain('value');
   });
 
   it('applies custom className', () => {
