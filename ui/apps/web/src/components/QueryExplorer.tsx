@@ -1,8 +1,9 @@
 import type { QueryType, SerializationFormat } from '@hello-sparql/types';
-import { CodeEditor, LoadingSpinner, ResultsTable } from '@hello-sparql/ui';
+import { CodeEditor, LoadingSpinner, PrefixesList, ResultsTable } from '@hello-sparql/ui';
 import type React from 'react';
 import { useEffect, useState } from 'react';
 import { DEFAULT_QUERY, INITIAL_DATA, QUERY_TEMPLATES } from '../constants/queries';
+import { usePrefixes } from '../hooks/usePrefixes';
 import { useSPARQLQuery } from '../hooks/useSPARQLQuery';
 
 // Utility function to detect query type from query string
@@ -67,6 +68,9 @@ export const QueryExplorer: React.FC = () => {
   const [duration, setDuration] = useState<number>(0);
   const [length, setLength] = useState<number>(0);
   const [errorMessage, setErrorMessage] = useState<string>('');
+
+  // Fetch prefixes
+  const { prefixes, isLoading: isPrefixesLoading, error: prefixesError } = usePrefixes();
 
   // Detect query type when query changes (but only when typing, not when using templates)
   useEffect(() => {
@@ -254,6 +258,24 @@ export const QueryExplorer: React.FC = () => {
           grid-template-columns: 1fr 1fr;
           gap: 24px;
           margin-bottom: 24px;
+        }
+
+        .rdf-section {
+          display: flex;
+          gap: 16px;
+          position: relative;
+        }
+
+        .rdf-editor-wrapper {
+          flex: 1;
+          min-width: 0;
+          transition: all 0.3s ease-out;
+        }
+
+        @media (max-width: 1400px) {
+          .rdf-section {
+            flex-direction: column;
+          }
         }
 
         @media (max-width: 1024px) {
@@ -449,15 +471,25 @@ export const QueryExplorer: React.FC = () => {
           </div>
         </div>
 
-        <div className="editor-panel">
-          <h2>📝 RDF Data</h2>
-          <p className="editor-hint">Enter your RDF data in Turtle format</p>
-          <CodeEditor
-            value={data}
-            onChange={setData}
-            language="turtle"
-            placeholder="Enter your RDF data here..."
-            minHeight="400px"
+        <div className="rdf-section">
+          <div className="rdf-editor-wrapper">
+            <div className="editor-panel">
+              <h2>📝 RDF Data</h2>
+              <p className="editor-hint">Enter your RDF data in Turtle format</p>
+              <CodeEditor
+                value={data}
+                onChange={setData}
+                language="turtle"
+                placeholder="Enter your RDF data here..."
+                minHeight="400px"
+              />
+            </div>
+          </div>
+
+          <PrefixesList
+            prefixes={prefixes}
+            isLoading={isPrefixesLoading}
+            error={prefixesError || undefined}
           />
         </div>
       </div>

@@ -47,3 +47,8 @@ export interface QueryExecutionResult {
   duration: number;
   format: SerializationFormat;
 }
+
+export interface Prefix {
+  prefix: string;
+  namespace: string;
+}

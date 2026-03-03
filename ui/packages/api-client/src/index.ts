@@ -1,4 +1,5 @@
 import type {
+  Prefix,
   SPARQLError,
   SPARQLQueryRequest,
   SPARQLResponse,
@@ -94,6 +95,29 @@ export class SPARQLClient {
       return response.ok;
     } catch {
       return false;
+    }
+  }
+
+  async getPrefixes(): Promise<Prefix[]> {
+    try {
+      const response = await fetch(`${this.baseURL}/prefixes`);
+
+      if (!response.ok) {
+        throw new SPARQLAPIError('Failed to fetch prefixes', response.status);
+      }
+
+      const data: Prefix[] = await response.json();
+      return data;
+    } catch (error) {
+      if (error instanceof SPARQLAPIError) {
+        throw error;
+      }
+
+      if (error instanceof Error) {
+        throw new SPARQLAPIError(error.message);
+      }
+
+      throw new SPARQLAPIError('Unknown error occurred while fetching prefixes');
     }
   }
 
