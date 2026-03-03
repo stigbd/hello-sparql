@@ -301,3 +301,36 @@ async def test_construct_query_unsupported_data_format() -> None:
             json={"query": query, "data": data},
         )
     assert response.status_code == HTTPStatus.NOT_ACCEPTABLE
+
+
+@pytest.mark.anyio
+async def test_json_ld_without_prefixes() -> None:
+    """Should return 200 OK and empty context."""
+    query = "CONSTRUCT {?s ?p ?o .} WHERE {?s ?p ?o .}"
+    data = """
+    <http://example.org#ex:Alice>
+        <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://example.org#ex:Person>.
+	"""
+
+    headers = {"Accept": "application/ld+json"}
+    async with AsyncClient(
+        transport=ASGITransport(app=app), base_url="http://test"
+    ) as ac:
+        response = await ac.post(
+            "/sparql",
+            headers=headers,
+            json={"query": query, "data": data, "inference": False},
+        )
+    assert response.status_code == HTTPStatus.OK, response.json()
+    assert response.headers["content-type"] == "application/json"
+    data = response.json()
+    assert "length" in data
+    assert isinstance(data["length"], int)
+    assert data["length"] > 0
+    assert "result" in data
+    assert len(data["result"]) > 0
+    assert "result_content_type" in data
+    if not headers or "Accept" not in headers:
+        assert data["result_content_type"] == "text/turtle"
+    else:
+        assert data["result_content_type"] == headers["Accept"]
