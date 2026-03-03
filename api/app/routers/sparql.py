@@ -111,10 +111,8 @@ async def run_sparql(request: Request, sparql_request: SPARQLRequest) -> SPARQLR
         if parsed_query.algebra.name == "AskQuery":
             result = "true" if qres.askAnswer else "false"
         elif serialization_format == "json-ld":
-            custom_context = {
-                "ex": "http://example.org#"  # Optional: set a default vocabular
-            }
-            result = qres.serialize(format=serialization_format, context=custom_context)
+            context = await get_context_from_prefixes_in_data(sparql_request.data)
+            result = qres.serialize(format=serialization_format, context=context)
         else:
             result = qres.serialize(format=serialization_format)
         return SPARQLResponse(
@@ -180,3 +178,17 @@ async def get_format_and_media_type_for_describe_construct(
         status_code=HTTPStatus.NOT_ACCEPTABLE,
         detail=f"Unsupported Accept header: {accept}",
     )
+
+
+async def get_context_from_prefixes_in_data(data: str) -> dict[str, str]:
+    """Get a JSON-LD context from the prefixes used in the data."""
+    # Add all prefixes used in the data and their corresponding URIs:
+    context = {}
+    for line in data.splitlines():
+        if line.strip().startswith("@prefix"):
+            parts = line.split()
+            if len(parts) >= 3:  # noqa: PLR2004 # pragma: no cover
+                prefix = parts[1].rstrip(":")
+                uri = parts[2].rstrip(".").strip("<>")
+                context[prefix] = uri
+    return context
