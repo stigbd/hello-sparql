@@ -11,8 +11,8 @@ from rdflib import Graph
 from rdflib.exceptions import Error
 from rdflib.plugins.sparql import prepareQuery
 
-router = APIRouter(tags=["contestants"])
-logger = logging.getLogger("event_service.views.contestants")
+router = APIRouter(tags=["sparql"])
+logger = logging.getLogger("sparql")
 
 
 class SPARQLRequest(BaseModel):

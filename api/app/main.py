@@ -3,7 +3,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routers import shacl, sparql
+from app.routers import prefixes, shacl, sparql
 
 app = FastAPI()
 
@@ -31,3 +31,4 @@ async def health_check() -> dict[str, str]:
 # Set up routes:
 app.include_router(sparql.router)
 app.include_router(shacl.router)
+app.include_router(prefixes.router)
