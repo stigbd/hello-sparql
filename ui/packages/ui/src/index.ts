@@ -6,3 +6,6 @@ export type { ResultsTableProps } from './components/ResultsTable';
 
 export { LoadingSpinner } from './components/LoadingSpinner';
 export type { LoadingSpinnerProps } from './components/LoadingSpinner';
+
+export { PrefixesList } from './components/PrefixesList';
+export type { PrefixesListProps } from './components/PrefixesList';

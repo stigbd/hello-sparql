@@ -9,8 +9,8 @@ from pyshacl import validate
 from rdflib import Graph
 from rdflib.exceptions import ParserError
 
-router = APIRouter(tags=["contestants"])
-logger = logging.getLogger("event_service.views.contestants")
+router = APIRouter(tags=["shacl"])
+logger = logging.getLogger("shacl")
 
 
 class SHACLRequest(BaseModel):
