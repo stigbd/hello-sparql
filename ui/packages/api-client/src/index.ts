@@ -1,5 +1,8 @@
 import type {
   Prefix,
+  SHACLError,
+  SHACLValidationRequest,
+  SHACLValidationResponse,
   SPARQLError,
   SPARQLQueryRequest,
   SPARQLResponse,
@@ -118,6 +121,58 @@ export class SPARQLClient {
       }
 
       throw new SPARQLAPIError('Unknown error occurred while fetching prefixes');
+    }
+  }
+
+  async validateSHACL(request: SHACLValidationRequest): Promise<SHACLValidationResponse> {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), this.timeout);
+
+    try {
+      const response = await fetch(`${this.baseURL}/shacl`, {
+        method: 'POST',
+        body: JSON.stringify({
+          data: request.data,
+          shapes: request.shapes,
+          inference: request.inference ?? false,
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        const errorData: SHACLError = await response.json().catch(() => ({
+          detail: `HTTP error ${response.status}: ${response.statusText}`,
+        }));
+        throw new SPARQLAPIError(
+          errorData.detail || 'Failed to validate SHACL',
+          response.status,
+          errorData.detail
+        );
+      }
+
+      const data: SHACLValidationResponse = await response.json();
+      return data;
+    } catch (error) {
+      clearTimeout(timeoutId);
+
+      if (error instanceof SPARQLAPIError) {
+        throw error;
+      }
+
+      if (error instanceof Error) {
+        if (error.name === 'AbortError') {
+          throw new SPARQLAPIError('Request timeout', 408);
+        }
+        throw new SPARQLAPIError(error.message);
+      }
+
+      throw new SPARQLAPIError('Unknown error occurred');
     }
   }
 

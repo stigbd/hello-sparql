@@ -1,29 +1,29 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { App } from '../App';
-import * as QueryExplorerModule from '../components/QueryExplorer';
+import * as RDFExplorerModule from '../components/RDFExplorer';
 
-// Mock the QueryExplorer component
-vi.mock('../components/QueryExplorer', () => ({
-  QueryExplorer: vi.fn(() => <div data-testid="query-explorer">QueryExplorer Mock</div>),
+// Mock the RDFExplorer component
+vi.mock('../components/RDFExplorer', () => ({
+  RDFExplorer: vi.fn(() => <div data-testid="rdf-explorer">RDFExplorer Mock</div>),
 }));
 
 describe('App', () => {
   it('renders without crashing', () => {
     render(<App />);
-    expect(screen.getByTestId('query-explorer')).toBeInTheDocument();
+    expect(screen.getByTestId('rdf-explorer')).toBeInTheDocument();
   });
 
-  it('wraps QueryExplorer with QueryClientProvider', () => {
+  it('wraps RDFExplorer with QueryClientProvider', () => {
     render(<App />);
-    expect(QueryExplorerModule.QueryExplorer).toHaveBeenCalled();
+    expect(RDFExplorerModule.RDFExplorer).toHaveBeenCalled();
   });
 
-  it('renders QueryExplorer component', () => {
+  it('renders RDFExplorer component', () => {
     render(<App />);
-    const queryExplorer = screen.getByTestId('query-explorer');
-    expect(queryExplorer).toBeInTheDocument();
-    expect(queryExplorer).toHaveTextContent('QueryExplorer Mock');
+    const rdfExplorer = screen.getByTestId('rdf-explorer');
+    expect(rdfExplorer).toBeInTheDocument();
+    expect(rdfExplorer).toHaveTextContent('RDFExplorer Mock');
   });
 
   it('creates QueryClient with correct default options', () => {

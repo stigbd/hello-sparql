@@ -26,7 +26,7 @@ ui/
 │   │   ├── main.tsx                   # Entry point
 │   │   └── vite-env.d.ts              # Environment types
 │   ├── public/
-│   │   └── sparql-40.png              # Favicon
+│   │   └── rdf_w3c_icon_48.gif              # Favicon
 │   ├── index.html                     # HTML template
 │   ├── vite.config.ts                 # Vite config
 │   ├── tsconfig.json                  # TypeScript config

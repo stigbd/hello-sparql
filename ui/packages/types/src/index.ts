@@ -52,3 +52,19 @@ export interface Prefix {
   prefix: string;
   namespace: string;
 }
+
+export interface SHACLValidationRequest {
+  data: string;
+  shapes: string;
+  inference?: boolean;
+}
+
+export interface SHACLValidationResponse {
+  length: number;
+  result_content_type: string | null;
+  result: string;
+}
+
+export interface SHACLError {
+  detail: string;
+}

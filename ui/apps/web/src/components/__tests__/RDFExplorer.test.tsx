@@ -3,7 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import * as useSPARQLQueryModule from '../../hooks/useSPARQLQuery';
-import { QueryExplorer } from '../QueryExplorer';
+import { RDFExplorer } from '../RDFExplorer';
 
 // Mock the hook
 vi.mock('../../hooks/useSPARQLQuery');
@@ -21,7 +21,7 @@ const createWrapper = () => {
   );
 };
 
-describe('QueryExplorer', () => {
+describe('RDFExplorer', () => {
   let mockExecuteQuery: ReturnType<typeof vi.fn>;
   let mockUseSPARQLQuery: ReturnType<typeof vi.fn>;
 
@@ -44,24 +44,24 @@ describe('QueryExplorer', () => {
     const Wrapper = createWrapper();
     render(
       <Wrapper>
-        <QueryExplorer />
+        <RDFExplorer />
       </Wrapper>
     );
 
-    expect(screen.getByText('SPARQL Query Explorer')).toBeInTheDocument();
+    expect(screen.getByText('RDF Explorer')).toBeInTheDocument();
   });
 
   it('renders header with title and description', () => {
     const Wrapper = createWrapper();
     render(
       <Wrapper>
-        <QueryExplorer />
+        <RDFExplorer />
       </Wrapper>
     );
 
-    expect(screen.getByText('SPARQL Query Explorer')).toBeInTheDocument();
+    expect(screen.getByText('RDF Explorer')).toBeInTheDocument();
     expect(
-      screen.getByText('Execute SPARQL queries on RDF data and explore the results')
+      screen.getByText('Execute SPARQL queries and validate RDF data with SHACL shapes')
     ).toBeInTheDocument();
   });
 
@@ -69,7 +69,7 @@ describe('QueryExplorer', () => {
     const Wrapper = createWrapper();
     render(
       <Wrapper>
-        <QueryExplorer />
+        <RDFExplorer />
       </Wrapper>
     );
 
@@ -80,7 +80,7 @@ describe('QueryExplorer', () => {
     const Wrapper = createWrapper();
     render(
       <Wrapper>
-        <QueryExplorer />
+        <RDFExplorer />
       </Wrapper>
     );
 
@@ -91,7 +91,7 @@ describe('QueryExplorer', () => {
     const Wrapper = createWrapper();
     render(
       <Wrapper>
-        <QueryExplorer />
+        <RDFExplorer />
       </Wrapper>
     );
 
@@ -102,11 +102,13 @@ describe('QueryExplorer', () => {
     const Wrapper = createWrapper();
     render(
       <Wrapper>
-        <QueryExplorer />
+        <RDFExplorer />
       </Wrapper>
     );
 
-    expect(screen.getByText('🔍 SPARQL Query')).toBeInTheDocument();
+    // Text appears in both tab and heading, so use getAllByText
+    const sparqlQueryElements = screen.getAllByText('🔍 SPARQL Query');
+    expect(sparqlQueryElements.length).toBeGreaterThan(0);
     expect(screen.getByText('Enter your SPARQL query below')).toBeInTheDocument();
   });
 
@@ -114,7 +116,7 @@ describe('QueryExplorer', () => {
     const Wrapper = createWrapper();
     render(
       <Wrapper>
-        <QueryExplorer />
+        <RDFExplorer />
       </Wrapper>
     );
 
@@ -126,7 +128,7 @@ describe('QueryExplorer', () => {
     const Wrapper = createWrapper();
     render(
       <Wrapper>
-        <QueryExplorer />
+        <RDFExplorer />
       </Wrapper>
     );
 
@@ -138,7 +140,7 @@ describe('QueryExplorer', () => {
     const Wrapper = createWrapper();
     render(
       <Wrapper>
-        <QueryExplorer />
+        <RDFExplorer />
       </Wrapper>
     );
 
@@ -149,7 +151,7 @@ describe('QueryExplorer', () => {
     const Wrapper = createWrapper();
     render(
       <Wrapper>
-        <QueryExplorer />
+        <RDFExplorer />
       </Wrapper>
     );
 
@@ -165,7 +167,7 @@ describe('QueryExplorer', () => {
 
     render(
       <Wrapper>
-        <QueryExplorer />
+        <RDFExplorer />
       </Wrapper>
     );
 
@@ -189,7 +191,7 @@ describe('QueryExplorer', () => {
     const Wrapper = createWrapper();
     render(
       <Wrapper>
-        <QueryExplorer />
+        <RDFExplorer />
       </Wrapper>
     );
 
@@ -218,7 +220,7 @@ describe('QueryExplorer', () => {
     const Wrapper = createWrapper();
     const { rerender } = render(
       <Wrapper>
-        <QueryExplorer />
+        <RDFExplorer />
       </Wrapper>
     );
 
@@ -239,7 +241,7 @@ describe('QueryExplorer', () => {
 
     rerender(
       <Wrapper>
-        <QueryExplorer />
+        <RDFExplorer />
       </Wrapper>
     );
   });
@@ -250,7 +252,7 @@ describe('QueryExplorer', () => {
 
     render(
       <Wrapper>
-        <QueryExplorer />
+        <RDFExplorer />
       </Wrapper>
     );
 
@@ -269,7 +271,7 @@ describe('QueryExplorer', () => {
 
     render(
       <Wrapper>
-        <QueryExplorer />
+        <RDFExplorer />
       </Wrapper>
     );
 
@@ -285,7 +287,7 @@ describe('QueryExplorer', () => {
 
     render(
       <Wrapper>
-        <QueryExplorer />
+        <RDFExplorer />
       </Wrapper>
     );
 
@@ -331,7 +333,7 @@ describe('QueryExplorer', () => {
 
     render(
       <Wrapper>
-        <QueryExplorer />
+        <RDFExplorer />
       </Wrapper>
     );
 
@@ -351,7 +353,7 @@ describe('QueryExplorer', () => {
 
     render(
       <Wrapper>
-        <QueryExplorer />
+        <RDFExplorer />
       </Wrapper>
     );
 
@@ -370,7 +372,7 @@ describe('QueryExplorer', () => {
 
     render(
       <Wrapper>
-        <QueryExplorer />
+        <RDFExplorer />
       </Wrapper>
     );
 
@@ -390,7 +392,7 @@ describe('QueryExplorer', () => {
     const Wrapper = createWrapper();
     render(
       <Wrapper>
-        <QueryExplorer />
+        <RDFExplorer />
       </Wrapper>
     );
 
@@ -408,7 +410,7 @@ describe('QueryExplorer', () => {
     const Wrapper = createWrapper();
     render(
       <Wrapper>
-        <QueryExplorer />
+        <RDFExplorer />
       </Wrapper>
     );
 
@@ -425,7 +427,7 @@ describe('QueryExplorer', () => {
     const Wrapper = createWrapper();
     render(
       <Wrapper>
-        <QueryExplorer />
+        <RDFExplorer />
       </Wrapper>
     );
 
@@ -440,7 +442,7 @@ describe('QueryExplorer', () => {
     const Wrapper = createWrapper();
     render(
       <Wrapper>
-        <QueryExplorer />
+        <RDFExplorer />
       </Wrapper>
     );
 
@@ -465,14 +467,14 @@ describe('QueryExplorer', () => {
     const Wrapper = createWrapper();
     const { rerender } = render(
       <Wrapper>
-        <QueryExplorer />
+        <RDFExplorer />
       </Wrapper>
     );
 
     // Simulate successful execution by setting state
     rerender(
       <Wrapper>
-        <QueryExplorer />
+        <RDFExplorer />
       </Wrapper>
     );
 
@@ -486,7 +488,7 @@ describe('QueryExplorer', () => {
 
     render(
       <Wrapper>
-        <QueryExplorer />
+        <RDFExplorer />
       </Wrapper>
     );
 
@@ -506,7 +508,7 @@ describe('QueryExplorer', () => {
 
     render(
       <Wrapper>
-        <QueryExplorer />
+        <RDFExplorer />
       </Wrapper>
     );
 
@@ -532,7 +534,7 @@ describe('QueryExplorer', () => {
 
     render(
       <Wrapper>
-        <QueryExplorer />
+        <RDFExplorer />
       </Wrapper>
     );
 
@@ -552,17 +554,17 @@ describe('QueryExplorer', () => {
     const Wrapper = createWrapper();
     render(
       <Wrapper>
-        <QueryExplorer />
+        <RDFExplorer />
       </Wrapper>
     );
 
-    const explorer = document.querySelector('.query-explorer');
+    const explorer = document.querySelector('.rdf-explorer');
     expect(explorer).toBeInTheDocument();
 
     // Check that styles are present (may be multiple style tags due to Prism)
     const styles = Array.from(document.querySelectorAll('style'));
     const allStyles = styles.map((s) => s.textContent).join('');
-    expect(allStyles).toContain('.query-explorer');
+    expect(allStyles).toContain('.rdf-explorer');
     expect(allStyles).toContain('.button');
     expect(allStyles).toContain('.editor-panel');
   });
