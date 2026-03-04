@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type React from 'react';
-import { QueryExplorer } from './components/QueryExplorer';
+import { RDFExplorer } from './components/RDFExplorer';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -14,7 +14,7 @@ const queryClient = new QueryClient({
 export const App: React.FC = () => {
   return (
     <QueryClientProvider client={queryClient}>
-      <QueryExplorer />
+      <RDFExplorer />
     </QueryClientProvider>
   );
 };

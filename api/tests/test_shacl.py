@@ -14,8 +14,9 @@ def anyio_backend() -> str:
     return "asyncio"
 
 
+@pytest.mark.parametrize("inference", [True, False])
 @pytest.mark.anyio
-async def test_shacl_with_valid_data_and_shapes() -> None:
+async def test_shacl_with_valid_data_and_shapes(*, inference: bool) -> None:
     """Should return 200 OK and text body."""
     data = r"""
     @prefix ex: <http://example.org#> .
@@ -57,10 +58,15 @@ async def test_shacl_with_valid_data_and_shapes() -> None:
         transport=ASGITransport(app=app), base_url="http://test"
     ) as ac:
         response = await ac.post(
-            "/shacl", headers=headers, json={"shapes": shapes, "data": data}
+            "/shacl",
+            headers=headers,
+            json={"shapes": shapes, "data": data, "inference": inference},
         )
     assert response.status_code == HTTPStatus.OK, response.json()
-    assert headers["Accept"] in response.headers["content-type"]
+    assert response.headers["content-type"] == "application/json"
+    result = response.json()
+    assert result["length"] > 1
+    assert result["result_content_type"] == "text/turtle"
 
 
 @pytest.mark.anyio

@@ -2,9 +2,18 @@ import type { QueryType, SerializationFormat } from '@hello-sparql/types';
 import { CodeEditor, LoadingSpinner, PrefixesList, ResultsTable } from '@hello-sparql/ui';
 import type React from 'react';
 import { useEffect, useState } from 'react';
-import { DEFAULT_QUERY, INITIAL_DATA, QUERY_TEMPLATES } from '../constants/queries';
+import {
+  DEFAULT_QUERY,
+  DEFAULT_SHACL_SHAPES,
+  INITIAL_DATA,
+  QUERY_TEMPLATES,
+  SHACL_TEMPLATES,
+} from '../constants/queries';
 import { usePrefixes } from '../hooks/usePrefixes';
+import { useSHACLValidation } from '../hooks/useSHACLValidation';
 import { useSPARQLQuery } from '../hooks/useSPARQLQuery';
+
+type ActiveTab = 'sparql' | 'shacl';
 
 // Utility function to detect query type from query string
 const detectQueryType = (query: string): QueryType => {
@@ -58,22 +67,30 @@ const getFormatLabel = (format: SerializationFormat): string => {
   }
 };
 
-export const QueryExplorer: React.FC = () => {
-  const [query, setQuery] = useState<string>(DEFAULT_QUERY);
+export const RDFExplorer: React.FC = () => {
+  const [activeTab, setActiveTab] = useState<ActiveTab>('sparql');
   const [data, setData] = useState<string>(INITIAL_DATA);
-  const [queryType, setQueryType] = useState<QueryType>('select');
-  const [selectedFormat, setSelectedFormat] = useState<SerializationFormat>('sparql-json');
   const [inference, setInference] = useState<boolean>(false);
   const [result, setResult] = useState<string>('');
   const [duration, setDuration] = useState<number>(0);
   const [length, setLength] = useState<number>(0);
   const [errorMessage, setErrorMessage] = useState<string>('');
 
+  // SPARQL state
+  const [query, setQuery] = useState<string>(DEFAULT_QUERY);
+  const [queryType, setQueryType] = useState<QueryType>('select');
+  const [selectedFormat, setSelectedFormat] = useState<SerializationFormat>('sparql-json');
+
+  // SHACL state
+  const [shapes, setShapes] = useState<string>(DEFAULT_SHACL_SHAPES);
+
   // Fetch prefixes
   const { prefixes, isLoading: isPrefixesLoading, error: prefixesError } = usePrefixes();
 
   // Detect query type when query changes (but only when typing, not when using templates)
   useEffect(() => {
+    if (activeTab !== 'sparql') return;
+
     const detectedType = detectQueryType(query);
 
     // Only update if the detected type is different from current type
@@ -86,9 +103,9 @@ export const QueryExplorer: React.FC = () => {
         setSelectedFormat(getDefaultFormat(detectedType));
       }
     }
-  }, [query, queryType, selectedFormat]);
+  }, [query, queryType, selectedFormat, activeTab]);
 
-  const { executeQuery, isLoading } = useSPARQLQuery({
+  const { executeQuery, isLoading: isSparqlLoading } = useSPARQLQuery({
     onSuccess: (data, executionDuration, resultLength) => {
       setResult(data);
       setDuration(executionDuration);
@@ -101,6 +118,21 @@ export const QueryExplorer: React.FC = () => {
     },
   });
 
+  const { validateSHACL, isLoading: isShaclLoading } = useSHACLValidation({
+    onSuccess: (data, executionDuration, resultLength) => {
+      setResult(data);
+      setDuration(executionDuration);
+      setLength(resultLength);
+      setErrorMessage('');
+    },
+    onError: (error) => {
+      setErrorMessage(error.detail || error.message);
+      setResult('');
+    },
+  });
+
+  const isLoading = isSparqlLoading || isShaclLoading;
+
   const handleExecuteQuery = () => {
     if (!query.trim() || !data.trim()) {
       setErrorMessage('Both query and data are required');
@@ -110,6 +142,19 @@ export const QueryExplorer: React.FC = () => {
     executeQuery({
       request: { query, data, inference },
       format: selectedFormat,
+    });
+  };
+
+  const handleExecuteValidation = () => {
+    if (!shapes.trim() || !data.trim()) {
+      setErrorMessage('Both shapes and data are required');
+      return;
+    }
+
+    validateSHACL({
+      data,
+      shapes,
+      inference,
     });
   };
 
@@ -124,8 +169,24 @@ export const QueryExplorer: React.FC = () => {
     }
   };
 
+  const handleShapeTemplateChange = (templateKey: string) => {
+    const template = SHACL_TEMPLATES[templateKey];
+    if (template) {
+      setShapes(template.shapes);
+    }
+  };
+
+  const handleTabChange = (tab: ActiveTab) => {
+    setActiveTab(tab);
+    // Clear results when switching tabs
+    setResult('');
+    setDuration(0);
+    setLength(0);
+    setErrorMessage('');
+  };
+
   return (
-    <div className="query-explorer">
+    <div className="rdf-explorer">
       <style>{`
         * {
           box-sizing: border-box;
@@ -142,7 +203,7 @@ export const QueryExplorer: React.FC = () => {
           background-color: #f8fafc;
         }
 
-        .query-explorer {
+        .rdf-explorer {
           max-width: 1400px;
           margin: 0 auto;
           padding: 24px;
@@ -167,6 +228,36 @@ export const QueryExplorer: React.FC = () => {
         .header p {
           color: #64748b;
           font-size: 16px;
+        }
+
+        .tabs {
+          display: flex;
+          gap: 8px;
+          margin-bottom: 24px;
+          border-bottom: 2px solid #e2e8f0;
+        }
+
+        .tab {
+          padding: 12px 24px;
+          background: transparent;
+          border: none;
+          border-bottom: 3px solid transparent;
+          color: #64748b;
+          font-size: 16px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s;
+          margin-bottom: -2px;
+        }
+
+        .tab:hover {
+          color: #475569;
+          background-color: #f8fafc;
+        }
+
+        .tab.active {
+          color: #3b82f6;
+          border-bottom-color: #3b82f6;
         }
 
         .controls {
@@ -380,56 +471,105 @@ export const QueryExplorer: React.FC = () => {
       <div className="header">
         <h1>
           <span>
-            <img src="sparql-40.png" alt="Icon" />
+            <img src="rdf_w3c_icon_48.gif" alt="Icon" />
           </span>
-          SPARQL Query Explorer
+          RDF Explorer
         </h1>
-        <p>Execute SPARQL queries on RDF data and explore the results</p>
+        <p>Execute SPARQL queries and validate RDF data with SHACL shapes</p>
       </div>
 
-      <div className="controls">
-        <div className="control-group">
-          <label htmlFor="query-template">Query Template:</label>
-          <select
-            id="query-template"
-            className="select"
-            onChange={(e) => handleTemplateChange(e.target.value)}
-            defaultValue="select"
-          >
-            {Object.entries(QUERY_TEMPLATES).map(([key, template]) => (
-              <option key={key} value={key}>
-                {template.label}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="control-group">
-          <label htmlFor="result-format">Result Format:</label>
-          <select
-            id="result-format"
-            className="select"
-            value={selectedFormat}
-            onChange={(e) => setSelectedFormat(e.target.value as SerializationFormat)}
-          >
-            {getAvailableFormats(queryType).map((format) => (
-              <option key={format} value={format}>
-                {getFormatLabel(format)}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="control-group">
-          <label htmlFor="inference-toggle">Enable Inference</label>
-          <input
-            type="checkbox"
-            id="inference-toggle"
-            checked={inference}
-            onChange={(e) => setInference(e.target.checked)}
-          />
-        </div>
+      <div className="tabs">
+        <button
+          type="button"
+          className={`tab ${activeTab === 'sparql' ? 'active' : ''}`}
+          onClick={() => handleTabChange('sparql')}
+        >
+          🔍 SPARQL Query
+        </button>
+        <button
+          type="button"
+          className={`tab ${activeTab === 'shacl' ? 'active' : ''}`}
+          onClick={() => handleTabChange('shacl')}
+        >
+          ✓ SHACL Validation
+        </button>
       </div>
+
+      {activeTab === 'sparql' && (
+        <div className="controls">
+          <div className="control-group">
+            <label htmlFor="query-template">Query Template:</label>
+            <select
+              id="query-template"
+              className="select"
+              onChange={(e) => handleTemplateChange(e.target.value)}
+              defaultValue="select"
+            >
+              {Object.entries(QUERY_TEMPLATES).map(([key, template]) => (
+                <option key={key} value={key}>
+                  {template.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="control-group">
+            <label htmlFor="result-format">Result Format:</label>
+            <select
+              id="result-format"
+              className="select"
+              value={selectedFormat}
+              onChange={(e) => setSelectedFormat(e.target.value as SerializationFormat)}
+            >
+              {getAvailableFormats(queryType).map((format) => (
+                <option key={format} value={format}>
+                  {getFormatLabel(format)}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="control-group">
+            <label htmlFor="inference-toggle">Enable Inference</label>
+            <input
+              type="checkbox"
+              id="inference-toggle"
+              checked={inference}
+              onChange={(e) => setInference(e.target.checked)}
+            />
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'shacl' && (
+        <div className="controls">
+          <div className="control-group">
+            <label htmlFor="shape-template">Shape Template:</label>
+            <select
+              id="shape-template"
+              className="select"
+              onChange={(e) => handleShapeTemplateChange(e.target.value)}
+              defaultValue="basic"
+            >
+              {Object.entries(SHACL_TEMPLATES).map(([key, template]) => (
+                <option key={key} value={key}>
+                  {template.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="control-group">
+            <label htmlFor="inference-toggle-shacl">Enable Inference</label>
+            <input
+              type="checkbox"
+              id="inference-toggle-shacl"
+              checked={inference}
+              onChange={(e) => setInference(e.target.checked)}
+            />
+          </div>
+        </div>
+      )}
 
       {errorMessage && (
         <div className="error-banner">
@@ -440,35 +580,73 @@ export const QueryExplorer: React.FC = () => {
 
       <div className="editors-container">
         <div className="editor-panel">
-          <h2>🔍 SPARQL Query</h2>
-          <p className="editor-hint">Enter your SPARQL query below</p>
-          <CodeEditor
-            value={query}
-            onChange={setQuery}
-            language="sparql"
-            placeholder="Enter your SPARQL query here..."
-            minHeight="400px"
-          />
-          <div style={{ marginTop: '16px' }}>
-            <button
-              type="button"
-              className="button button-primary"
-              onClick={handleExecuteQuery}
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <>
-                  <span>⏳</span>
-                  Executing...
-                </>
-              ) : (
-                <>
-                  <span>▶️</span>
-                  Execute Query
-                </>
-              )}
-            </button>
-          </div>
+          {activeTab === 'sparql' && (
+            <>
+              <h2>🔍 SPARQL Query</h2>
+              <p className="editor-hint">Enter your SPARQL query below</p>
+              <CodeEditor
+                value={query}
+                onChange={setQuery}
+                language="sparql"
+                placeholder="Enter your SPARQL query here..."
+                minHeight="400px"
+              />
+              <div style={{ marginTop: '16px' }}>
+                <button
+                  type="button"
+                  className="button button-primary"
+                  onClick={handleExecuteQuery}
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <>
+                      <span>⏳</span>
+                      Executing...
+                    </>
+                  ) : (
+                    <>
+                      <span>▶️</span>
+                      Execute Query
+                    </>
+                  )}
+                </button>
+              </div>
+            </>
+          )}
+
+          {activeTab === 'shacl' && (
+            <>
+              <h2>📐 SHACL Shapes</h2>
+              <p className="editor-hint">Define SHACL shapes to validate your RDF data</p>
+              <CodeEditor
+                value={shapes}
+                onChange={setShapes}
+                language="turtle"
+                placeholder="Enter your SHACL shapes here..."
+                minHeight="400px"
+              />
+              <div style={{ marginTop: '16px' }}>
+                <button
+                  type="button"
+                  className="button button-primary"
+                  onClick={handleExecuteValidation}
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <>
+                      <span>⏳</span>
+                      Validating...
+                    </>
+                  ) : (
+                    <>
+                      <span>✓</span>
+                      Validate Data
+                    </>
+                  )}
+                </button>
+              </div>
+            </>
+          )}
         </div>
 
         <div className="rdf-section">
@@ -499,7 +677,10 @@ export const QueryExplorer: React.FC = () => {
           <h2>Results</h2>
           {duration > 0 && (
             <span className="execution-time">
-              {length} {length === 1 ? 'result' : 'results'} in {duration.toFixed(3)}s
+              {activeTab === 'sparql'
+                ? `${length} ${length === 1 ? 'result' : 'results'}`
+                : `${length} ${length === 1 ? 'triple' : 'triples'}`}{' '}
+              in {duration.toFixed(3)}s
             </span>
           )}
         </div>
@@ -509,15 +690,25 @@ export const QueryExplorer: React.FC = () => {
         {!isLoading && !result && !errorMessage && (
           <div className="empty-state">
             <div className="empty-state-icon">🎯</div>
-            <h3>Ready to execute</h3>
-            <p>Enter your query and data, then click "Execute Query" to see results</p>
+            <h3>Ready to {activeTab === 'sparql' ? 'execute' : 'validate'}</h3>
+            <p>
+              {activeTab === 'sparql'
+                ? 'Enter your query and data, then click "Execute Query" to see results'
+                : 'Enter your shapes and data, then click "Validate Data" to see validation results'}
+            </p>
           </div>
         )}
 
-        {!isLoading && result && <ResultsTable data={result} format={selectedFormat} />}
+        {!isLoading && result && activeTab === 'sparql' && (
+          <ResultsTable data={result} format={selectedFormat} />
+        )}
+
+        {!isLoading && result && activeTab === 'shacl' && (
+          <CodeEditor value={result} onChange={() => {}} language="turtle" minHeight="300px" />
+        )}
       </div>
     </div>
   );
 };
 
-export default QueryExplorer;
+export default RDFExplorer;
