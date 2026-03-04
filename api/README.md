@@ -13,14 +13,14 @@ To run the API locally, navigate to the `api` directory and install the dependen
 Or with uvicorn:
 
 ```zsh
-% uv run uvicorn app:app --host 0.0.0.0 --port 8000 --workers 1 --log-config=logging.yaml
+% uv run uvicorn app:app --host 0.0.0.0 --port 8000 --workers 1 --log-config=logging.yaml --reload
 ```
 
 Or in docker:
 
 ```zsh
 % docker build -t hello-sparql-api .
-% docker run --name hello-sparql-api -d -p 8080:8080 hello-sparql-api
+% docker run --name hello-sparql-api -d -p 8000:8000 hello-sparql-api
 ```
 
 ## Usage:

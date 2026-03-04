@@ -4,7 +4,7 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 # Install uv.
-COPY --from=ghcr.io/astral-sh/uv:0.10.5 /uv /uvx /bin/
+COPY --from=ghcr.io/astral-sh/uv:0.10.7 /uv /uvx /bin/
 
 # Copy the application into the container.
 ADD . /app
@@ -17,4 +17,4 @@ RUN uv sync --frozen
 EXPOSE 8000
 
 # Run the application.
-CMD ["/app/.venv/bin/uvicorn", "app:app",  "--host", "0.0.0.0", "--port", "8000", "--workers", "4"]
+CMD ["/app/.venv/bin/uvicorn", "app:app",  "--host", "0.0.0.0", "--port", "8000", "--workers", "4", "--log-config=logging.yaml"]
