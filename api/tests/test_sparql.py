@@ -28,7 +28,8 @@ def anyio_backend() -> str:
 @pytest.mark.anyio
 async def test_select_query(
     headers: dict[str, str],
-    inference: bool,  # noqa: FBT001
+    *,
+    inference: bool,
 ) -> None:
     """Should return 200 OK and json body with correct content type."""
     query = "SELECT ?s ?p ?o WHERE { ?s ?p ?o }"
@@ -169,7 +170,8 @@ async def test_select_query_with_unsupported_data_format() -> None:
 @pytest.mark.parametrize("inference", [True, False])
 async def test_construct_query(
     headers: dict[str, str],
-    inference: bool,  # noqa: FBT001
+    *,
+    inference: bool,
 ) -> None:
     """Should return 200 OK and the serialized RDF data."""
     query = "CONSTRUCT {?s ?p ?o .} WHERE {?s ?p ?o .}"

@@ -3,7 +3,8 @@
 import logging
 from http import HTTPStatus
 
-from fastapi import APIRouter, Depends, HTTPException, Request, Response
+from fastapi import APIRouter, Depends, HTTPException, Request
+from owlrl import DeductiveClosure, OWLRL_Semantics
 from pydantic import BaseModel
 from pyshacl import validate
 from rdflib import Graph
@@ -18,6 +19,15 @@ class SHACLRequest(BaseModel):
 
     data: str
     shapes: str
+    inference: bool = False
+
+
+class SHACLResponse(BaseModel):
+    """Response model for the result of running a SHACL validation on RDF data."""
+
+    length: int
+    result_content_type: str | None = None
+    result: str
 
 
 async def check_content_type(request: Request) -> None:
@@ -36,16 +46,10 @@ async def check_content_type(request: Request) -> None:
     responses={
         200: {
             "description": "Result of running the SHACL validation",
-            "content": {
-                "text/plain": {},
-                "application/json": {},
-                "text/csv": {},
-                "text/xml": {},
-            },
         },
     },
 )
-async def run_shacl(shacl_request: SHACLRequest) -> Response:
+async def run_shacl(shacl_request: SHACLRequest) -> SHACLResponse:
     """Run the given SHACL validation on the provided RDF data."""
     # Parse the RDF data into a graph:
     data_graph = Graph()
@@ -63,12 +67,24 @@ async def run_shacl(shacl_request: SHACLRequest) -> Response:
         msg = "Invalid SHACL shapes: " + str(e)
         raise HTTPException(status_code=400, detail=msg) from e
 
+    # Run inference if requested:
+    if shacl_request.inference:
+        try:
+            DeductiveClosure(OWLRL_Semantics).expand(data_graph)
+        except Exception as e:  # pragma: no cover
+            msg = "Error running inference: " + str(e)
+            raise HTTPException(status_code=400, detail=msg) from e
+
     # Validate the
     _, results_graph, _ = validate(data_graph=data_graph, shacl_graph=shapes_graph)
     # Serialize the result:
     try:
         content = results_graph.serialize(format="turtle")
-        return Response(content=content, media_type="text/turtle")
+        return SHACLResponse(
+            length=len(results_graph),
+            result_content_type="text/turtle",
+            result=content,
+        )
     except Exception as e:  # pragma: no cover
         msg = "Error serializing query results: " + str(e)
         raise HTTPException(status_code=400, detail=msg) from e
