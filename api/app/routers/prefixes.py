@@ -7,7 +7,7 @@ from pydantic import BaseModel
 from rdflib import Graph
 
 router = APIRouter(tags=["rdf"])
-logger = logging.getLogger("prefixes")
+logger = logging.getLogger("uvicorn.error")
 
 
 class Prefix(BaseModel):

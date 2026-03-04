@@ -10,6 +10,12 @@ To run the API locally, navigate to the `api` directory and install the dependen
 % uv run fastapi dev
 ```
 
+Or with uvicorn:
+
+```zsh
+% uv run uvicorn app:app --host 0.0.0.0 --port 8000 --workers 1 --log-config=logging.yaml
+```
+
 Or in docker:
 
 ```zsh

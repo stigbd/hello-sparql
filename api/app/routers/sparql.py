@@ -12,7 +12,7 @@ from rdflib.exceptions import Error
 from rdflib.plugins.sparql import prepareQuery
 
 router = APIRouter(tags=["sparql"])
-logger = logging.getLogger("sparql")
+logger = logging.getLogger("uvicorn.error")
 
 
 class SPARQLRequest(BaseModel):

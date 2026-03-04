@@ -10,7 +10,7 @@ from rdflib import Graph
 from rdflib.exceptions import ParserError
 
 router = APIRouter(tags=["shacl"])
-logger = logging.getLogger("shacl")
+logger = logging.getLogger("uvicorn.error")
 
 
 class SHACLRequest(BaseModel):
