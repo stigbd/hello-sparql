@@ -1,5 +1,5 @@
 {
-  "name": "@hello-sparql/web",
+  "name": "@rdf-explorer/web",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -17,9 +17,9 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@hello-sparql/api-client": "workspace:*",
-    "@hello-sparql/types": "workspace:*",
-    "@hello-sparql/ui": "workspace:*",
+    "@rdf-explorer/api-client": "workspace:*",
+    "@rdf-explorer/types": "workspace:*",
+    "@rdf-explorer/ui": "workspace:*",
     "@tanstack/react-query": "^5.17.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"

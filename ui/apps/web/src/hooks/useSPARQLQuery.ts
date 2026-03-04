@@ -1,5 +1,5 @@
-import { type SPARQLAPIError, createSPARQLClient } from '@hello-sparql/api-client';
-import type { SPARQLQueryRequest, SerializationFormat } from '@hello-sparql/types';
+import { type SPARQLAPIError, createSPARQLClient } from '@rdf-explorer/api-client';
+import type { SPARQLQueryRequest, SerializationFormat } from '@rdf-explorer/types';
 import { useMutation } from '@tanstack/react-query';
 
 interface UseSPARQLQueryOptions {

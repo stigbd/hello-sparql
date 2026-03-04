@@ -7,7 +7,7 @@ import type {
   SPARQLQueryRequest,
   SPARQLResponse,
   SerializationFormat,
-} from '@hello-sparql/types';
+} from '@rdf-explorer/types';
 
 export class SPARQLAPIError extends Error {
   constructor(

@@ -1,5 +1,5 @@
-import { createSPARQLClient } from '@hello-sparql/api-client';
-import type { Prefix } from '@hello-sparql/types';
+import { createSPARQLClient } from '@rdf-explorer/api-client';
+import type { Prefix } from '@rdf-explorer/types';
 import { useEffect, useState } from 'react';
 
 interface UsePrefixesResult {

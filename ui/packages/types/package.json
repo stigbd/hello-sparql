@@ -1,5 +1,5 @@
 {
-  "name": "@hello-sparql/types",
+  "name": "@rdf-explorer/types",
   "version": "1.0.0",
   "private": true,
   "type": "module",

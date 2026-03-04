@@ -1,4 +1,4 @@
-import type { SerializationFormat } from '@hello-sparql/types';
+import type { SerializationFormat } from '@rdf-explorer/types';
 import type React from 'react';
 import { useState } from 'react';
 

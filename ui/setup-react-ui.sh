@@ -14,7 +14,7 @@ import type {
   SPARQLQueryRequest,
   SPARQLError,
   SerializationFormat,
-} from '@hello-sparql/types';
+} from '@rdf-explorer/types';
 
 export class SPARQLAPIError extends Error {
   constructor(
@@ -140,7 +140,7 @@ EOF
 
 cat > packages/ui/package.json << 'EOF'
 {
-  "name": "@hello-sparql/ui",
+  "name": "@rdf-explorer/ui",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -160,7 +160,7 @@ cat > packages/ui/package.json << 'EOF'
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@hello-sparql/types": "workspace:*",
+    "@rdf-explorer/types": "workspace:*",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
@@ -513,7 +513,7 @@ EOF
 # ============================================================================
 cat > apps/web/package.json << 'EOF'
 {
-  "name": "@hello-sparql/web",
+  "name": "@rdf-explorer/web",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -531,9 +531,9 @@ cat > apps/web/package.json << 'EOF'
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@hello-sparql/api-client": "workspace:*",
-    "@hello-sparql/types": "workspace:*",
-    "@hello-sparql/ui": "workspace:*",
+    "@rdf-explorer/api-client": "workspace:*",
+    "@rdf-explorer/types": "workspace:*",
+    "@rdf-explorer/ui": "workspace:*",
     "@tanstack/react-query": "^5.17.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
@@ -699,7 +699,7 @@ export default App;
 EOF
 
 cat > apps/web/src/constants/queries.ts << 'EOF'
-import type { QueryTemplate } from '@hello-sparql/types';
+import type { QueryTemplate } from '@rdf-explorer/types';
 
 export const QUERY_TEMPLATES: Record<string, QueryTemplate> = {
   select: {
@@ -762,8 +762,8 @@ EOF
 
 cat > apps/web/src/hooks/useSPARQLQuery.ts << 'EOF'
 import { useMutation } from '@tanstack/react-query';
-import { createSPARQLClient, SPARQLAPIError } from '@hello-sparql/api-client';
-import type { SPARQLQueryRequest, SerializationFormat } from '@hello-sparql/types';
+import { createSPARQLClient, SPARQLAPIError } from '@rdf-explorer/api-client';
+import type { SPARQLQueryRequest, SerializationFormat } from '@rdf-explorer/types';
 
 interface UseSPARQLQueryOptions {
   onSuccess?: (data: string, duration: number) => void;
@@ -810,8 +810,8 @@ EOF
 
 cat > apps/web/src/components/QueryExplorer.tsx << 'EOF'
 import React, { useState } from 'react';
-import { CodeEditor, ResultsTable, LoadingSpinner } from '@hello-sparql/ui';
-import type { SerializationFormat } from '@hello-sparql/types';
+import { CodeEditor, ResultsTable, LoadingSpinner } from '@rdf-explorer/ui';
+import type { SerializationFormat } from '@rdf-explorer/types';
 import { useSPARQLQuery } from '../hooks/useSPARQLQuery';
 import { QUERY_TEMPLATES, INITIAL_DATA, DEFAULT_QUERY } from '../constants/queries';
 

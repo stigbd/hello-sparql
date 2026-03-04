@@ -1,5 +1,5 @@
 {
-  "name": "@hello-sparql/ui",
+  "name": "@rdf-explorer/ui",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -20,7 +20,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@hello-sparql/types": "workspace:*",
+    "@rdf-explorer/types": "workspace:*",
     "prismjs": "^1.30.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"

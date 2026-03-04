@@ -1,4 +1,4 @@
-import type { QueryTemplate } from '@hello-sparql/types';
+import type { QueryTemplate } from '@rdf-explorer/types';
 
 export const QUERY_TEMPLATES: Record<string, QueryTemplate> = {
   select: {

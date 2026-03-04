@@ -34,9 +34,9 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './apps/web/src'),
-      '@hello-sparql/ui': path.resolve(__dirname, './packages/ui/src'),
-      '@hello-sparql/api-client': path.resolve(__dirname, './packages/api-client/src'),
-      '@hello-sparql/types': path.resolve(__dirname, './packages/types/src'),
+      '@rdf-explorer/ui': path.resolve(__dirname, './packages/ui/src'),
+      '@rdf-explorer/api-client': path.resolve(__dirname, './packages/api-client/src'),
+      '@rdf-explorer/types': path.resolve(__dirname, './packages/types/src'),
     },
   },
   esbuild: {

@@ -1,13 +1,13 @@
 {
   "type": "module",
-  "name": "hello-sparql-ui",
+  "name": "rdf-explorer-ui",
   "version": "1.0.0",
   "private": true,
   "description": "SPARQL Query Explorer UI",
   "scripts": {
     "dev": "pnpm --parallel --filter './apps/*' dev",
     "build": "pnpm --recursive build",
-    "preview": "pnpm --filter @hello-sparql/web preview",
+    "preview": "pnpm --filter @rdf-explorer/web preview",
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:run": "vitest run",

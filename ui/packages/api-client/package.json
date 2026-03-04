@@ -1,5 +1,5 @@
 {
-  "name": "@hello-sparql/api-client",
+  "name": "@rdf-explorer/api-client",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -14,7 +14,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@hello-sparql/types": "workspace:*"
+    "@rdf-explorer/types": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.3.3"

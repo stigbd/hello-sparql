@@ -1,4 +1,4 @@
-import type { Prefix } from '@hello-sparql/types';
+import type { Prefix } from '@rdf-explorer/types';
 import type React from 'react';
 import { useState } from 'react';
 

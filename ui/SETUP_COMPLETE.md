@@ -70,10 +70,10 @@ ui/
 
 ### 📦 Packages Created
 
-1. **@hello-sparql/types** - Shared TypeScript types
-2. **@hello-sparql/api-client** - SPARQL API client
-3. **@hello-sparql/ui** - Reusable UI components  
-4. **@hello-sparql/web** - Main React application
+1. **@rdf-explorer/types** - Shared TypeScript types
+2. **@rdf-explorer/api-client** - SPARQL API client
+3. **@rdf-explorer/ui** - Reusable UI components  
+4. **@rdf-explorer/web** - Main React application
 
 ### 🎨 Features Implemented
 
@@ -103,7 +103,7 @@ ui/
 
 ```bash
 # 1. Install dependencies
-cd hello-sparql/ui
+cd rdf-explorer/ui
 pnpm install
 
 # 2. Start the API (in separate terminal)
@@ -124,7 +124,7 @@ pnpm dev
 
 ```bash
 # From the root directory
-cd hello-sparql
+cd rdf-explorer
 docker compose up --build
 
 # Open browser
@@ -240,7 +240,7 @@ npm install -g pnpm
 
 ### "Cannot find module 'react'"
 ```bash
-cd hello-sparql/ui
+cd rdf-explorer/ui
 pnpm install
 ```
 
@@ -275,7 +275,7 @@ pnpm format
 
 1. **Start Development:**
    ```bash
-   cd hello-sparql/ui
+   cd rdf-explorer/ui
    pnpm install
    pnpm dev
    ```
@@ -318,7 +318,7 @@ Your React + TypeScript UI is now fully set up and ready to use!
 
 **To start using:**
 ```bash
-cd hello-sparql/ui
+cd rdf-explorer/ui
 pnpm install
 pnpm dev
 ```

@@ -345,7 +345,7 @@ wheels = [
 ]
 
 [[package]]
-name = "hello-sparql"
+name = "rdf-explorer"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [

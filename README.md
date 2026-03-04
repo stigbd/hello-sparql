@@ -1,8 +1,8 @@
-# hello-sparql
+# rdf-explorer
 
-A small project to study [SPARQL](https://www.w3.org/TR/sparql11-query/).
+A small project to study [SPARQL](https://www.w3.org/TR/sparql11-query/) and [SHACL](https://www.w3.org/TR/shacl/).
 
-Consists of a simple FastAPI backend that runs SPARQL queries and a modern React + TypeScript UI that allows you to enter a SPARQL query and RDF data to see the results.
+Consists of a simple FastAPI backend that runs SPARQL queries and SHACL validations, and a modern React + TypeScript UI that allows you to enter a SPARQL query or SHACL shapes, and RDF data to see the results.
 
 ## Usage
 
@@ -21,6 +21,8 @@ The API is available at [http://localhost:8000](http://localhost:8000) and its d
 ### API
 - FastAPI backend with Python
 - Executes SPARQL queries on RDF data
+- Validates RDF data against SHACL shapes
+- Supports inferencing and reasoning with RDF data
 - Supports multiple output formats (text, JSON, CSV, XML)
 
 ### UI

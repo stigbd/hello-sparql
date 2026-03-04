@@ -1,5 +1,5 @@
-import type { QueryType, SerializationFormat } from '@hello-sparql/types';
-import { CodeEditor, LoadingSpinner, PrefixesList, ResultsTable } from '@hello-sparql/ui';
+import type { QueryType, SerializationFormat } from '@rdf-explorer/types';
+import { CodeEditor, LoadingSpinner, PrefixesList, ResultsTable } from '@rdf-explorer/ui';
 import type React from 'react';
 import { useEffect, useState } from 'react';
 import {

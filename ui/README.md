@@ -119,8 +119,8 @@ pnpm test
 Build and run with Docker:
 
 ```bash
-docker build -t hello-sparql-ui .
-docker run --name hello-sparql-ui -d -p 3000:3000 hello-sparql-ui
+docker build -t rdf-explorer-ui .
+docker run --name rdf-explorer-ui -d -p 3000:3000 rdf-explorer-ui
 ```
 
 Or use with docker-compose from the root directory:
@@ -152,25 +152,25 @@ VITE_API_URL=http://localhost:8000
 
 ## Workspace Packages
 
-### @hello-sparql/web
+### @rdf-explorer/web
 
 The main web application. Contains the UI, routing, and application-specific logic.
 
-### @hello-sparql/ui
+### @rdf-explorer/ui
 
 Shared UI components that can be reused across applications:
 - `CodeEditor` - Code editor component with syntax highlighting
 - `ResultsTable` - Table component for displaying query results
 - `LoadingSpinner` - Loading indicator component
 
-### @hello-sparql/api-client
+### @rdf-explorer/api-client
 
 API client for communicating with the SPARQL backend:
 - `SPARQLClient` - Main client class
 - `createSPARQLClient` - Factory function
 - Error handling and request/response types
 
-### @hello-sparql/types
+### @rdf-explorer/types
 
 Shared TypeScript types and interfaces used across all packages:
 - `SPARQLQueryRequest` - Query request structure
@@ -183,7 +183,7 @@ Shared TypeScript types and interfaces used across all packages:
 To add a new package to the workspace:
 
 1. Create the package directory under `packages/`
-2. Add a `package.json` with the name `@hello-sparql/<package-name>`
+2. Add a `package.json` with the name `@rdf-explorer/<package-name>`
 3. Add it to the TypeScript references in dependent packages
 4. Run `pnpm install` to link the workspace packages
 

@@ -19,8 +19,8 @@ Or with uvicorn:
 Or in docker:
 
 ```zsh
-% docker build -t hello-sparql-api .
-% docker run --name hello-sparql-api -d -p 8000:8000 hello-sparql-api
+% docker build -t rdf-explorer-api .
+% docker run --name rdf-explorer-api -d -p 8000:8000 rdf-explorer-api
 ```
 
 ## Usage:
