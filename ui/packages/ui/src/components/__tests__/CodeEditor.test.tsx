@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { CodeEditor } from '../CodeEditor';
@@ -147,5 +147,49 @@ describe('CodeEditor', () => {
     render(<CodeEditor value={multilineText} onChange={onChange} />);
     const textarea = screen.getByRole('textbox') as HTMLTextAreaElement;
     expect(textarea.value).toBe(multilineText);
+  });
+
+  it('auto-resizes textarea based on content height', () => {
+    const onChange = vi.fn();
+    const { rerender } = render(<CodeEditor value="initial" onChange={onChange} />);
+    const textarea = screen.getByRole('textbox') as HTMLTextAreaElement;
+
+    // Mock scrollHeight
+    Object.defineProperty(textarea, 'scrollHeight', { configurable: true, value: 500 });
+
+    // Trigger re-render to run useLayoutEffect
+    rerender(<CodeEditor value="updated" onChange={onChange} />);
+
+    expect(textarea.style.height).toBe('500px');
+    expect(textarea.style.overflowY).toBe('hidden');
+  });
+
+  it('limits height to maxHeight and enables scroll', () => {
+    const onChange = vi.fn();
+    const { rerender } = render(
+      <CodeEditor value="initial" onChange={onChange} maxHeight="400px" />
+    );
+    const textarea = screen.getByRole('textbox') as HTMLTextAreaElement;
+
+    // Mock scrollHeight greater than maxHeight
+    Object.defineProperty(textarea, 'scrollHeight', { configurable: true, value: 500 });
+
+    rerender(<CodeEditor value="updated" onChange={onChange} maxHeight="400px" />);
+
+    expect(textarea.style.height).toBe('400px');
+    expect(textarea.style.overflowY).toBe('auto');
+  });
+
+  it('syncs scroll position', () => {
+    const onChange = vi.fn();
+    const { container } = render(<CodeEditor value="long text" onChange={onChange} />);
+    const textarea = screen.getByRole('textbox');
+
+    // Simulate scroll
+    fireEvent.scroll(textarea, { target: { scrollTop: 100, scrollLeft: 50 } });
+
+    const pre = container.querySelector('pre');
+    expect(pre?.scrollTop).toBe(100);
+    expect(pre?.scrollLeft).toBe(50);
   });
 });

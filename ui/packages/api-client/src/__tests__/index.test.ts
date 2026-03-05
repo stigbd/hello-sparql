@@ -418,6 +418,135 @@ describe('SPARQLClient', () => {
     });
   });
 
+  describe('getPrefixes', () => {
+    beforeEach(() => {
+      client = new SPARQLClient({ baseURL: 'http://localhost:8000' });
+    });
+
+    it('fetches prefixes successfully', async () => {
+      const mockResponse = [
+        {
+          prefix: 'rdf',
+          namespace: 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
+        },
+      ];
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(mockResponse),
+      });
+
+      const result = await client.getPrefixes();
+
+      expect(result).toEqual(mockResponse);
+      expect(mockFetch).toHaveBeenCalledWith('http://localhost:8000/prefixes');
+    });
+
+    it('throws SPARQLAPIError on error', async () => {
+      mockFetch.mockResolvedValue({
+        ok: false,
+        status: 500,
+        statusText: 'Internal Server Error',
+        json: () => Promise.resolve({ detail: 'Error' }),
+      });
+
+      await expect(client.getPrefixes()).rejects.toThrow(SPARQLAPIError);
+    });
+  });
+
+  describe('validateSHACL', () => {
+    beforeEach(() => {
+      client = new SPARQLClient({ baseURL: 'http://localhost:8000' });
+    });
+
+    it('validates SHACL successfully', async () => {
+      const mockResponse = {
+        length: 1,
+        result: 'validation report',
+        result_content_type: 'text/turtle',
+      };
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(mockResponse),
+      });
+
+      const result = await client.validateSHACL({
+        data: '@prefix ex: <http://example.org#>.',
+        shapes: '@prefix sh: <http://www.w3.org/ns/shacl#>.',
+      });
+
+      expect(result).toEqual(mockResponse);
+      expect(mockFetch).toHaveBeenCalledWith(
+        'http://localhost:8000/shacl',
+        expect.objectContaining({
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+        })
+      );
+    });
+
+    it('sends data and shapes as JSON', async () => {
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({ length: 0, result: 'report' }),
+      });
+
+      await client.validateSHACL({
+        data: 'data',
+        shapes: 'shapes',
+      });
+
+      const callArgs = mockFetch.mock.calls[0][1];
+      expect(callArgs.body).toBe(
+        JSON.stringify({
+          data: 'data',
+          shapes: 'shapes',
+          inference: false,
+        })
+      );
+    });
+
+    it('sends inference parameter as true when specified', async () => {
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({ length: 0, result: 'report' }),
+      });
+
+      await client.validateSHACL({
+        data: 'data',
+        shapes: 'shapes',
+        inference: true,
+      });
+
+      const callArgs = mockFetch.mock.calls[0][1];
+      expect(callArgs.body).toBe(
+        JSON.stringify({
+          data: 'data',
+          shapes: 'shapes',
+          inference: true,
+        })
+      );
+    });
+
+    it('throws SPARQLAPIError on HTTP error', async () => {
+      mockFetch.mockResolvedValue({
+        ok: false,
+        status: 400,
+        statusText: 'Bad Request',
+        json: () => Promise.resolve({ detail: 'Invalid SHACL' }),
+      });
+
+      await expect(
+        client.validateSHACL({
+          data: 'data',
+          shapes: 'shapes',
+        })
+      ).rejects.toThrow(SPARQLAPIError);
+    });
+  });
+
   describe('createSPARQLClient', () => {
     it('creates a new SPARQLClient instance', () => {
       const client = createSPARQLClient();

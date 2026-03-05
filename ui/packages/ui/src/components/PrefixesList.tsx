@@ -26,7 +26,13 @@ export const PrefixesList: React.FC<PrefixesListProps> = ({
     return `@prefix ${prefix.prefix}: <${prefix.namespace}> .`;
   };
 
-  const handleCopyPrefix = async (prefix: Prefix) => {
+  const handlePrefixClick = async (e: React.MouseEvent, prefix: Prefix) => {
+    // Check for Ctrl (Windows/Linux) or Command (Mac) key
+    if (e.ctrlKey || e.metaKey) {
+      window.open(prefix.namespace, '_blank');
+      return;
+    }
+
     const prefixText = formatPrefix(prefix, format);
     try {
       await navigator.clipboard.writeText(prefixText);
@@ -360,7 +366,9 @@ export const PrefixesList: React.FC<PrefixesListProps> = ({
             </div>
           </div>
 
-          <p className="prefixes-description">Click to copy prefix declaration</p>
+          <p className="prefixes-description">
+            Click to copy prefix declaration. Ctrl+Click to open URL.
+          </p>
 
           {isLoading && (
             <div className="loading-state">
@@ -387,8 +395,8 @@ export const PrefixesList: React.FC<PrefixesListProps> = ({
                     type="button"
                     key={prefix.prefix}
                     className="prefix-item"
-                    onClick={() => handleCopyPrefix(prefix)}
-                    title={`Click to copy: ${formatPrefix(prefix, format)}`}
+                    onClick={(e) => handlePrefixClick(e, prefix)}
+                    title={`Click to copy: ${formatPrefix(prefix, format)}\nCtrl+Click to open URL`}
                   >
                     <div className="prefix-text">
                       {format === 'rdf' ? (
