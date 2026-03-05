@@ -19,7 +19,9 @@ describe('PrefixesList', () => {
   it('displays the header and description', () => {
     render(<PrefixesList prefixes={[]} />);
     expect(screen.getByText('Available Prefixes')).toBeInTheDocument();
-    expect(screen.getByText('Click to copy prefix declaration')).toBeInTheDocument();
+    expect(
+      screen.getByText('Click to copy prefix declaration. Ctrl+Click to open URL.')
+    ).toBeInTheDocument();
   });
 
   it('renders list of prefixes', () => {
@@ -99,6 +101,25 @@ describe('PrefixesList', () => {
     );
   });
 
+  it('opens namespace URL in new tab when Ctrl+Clicking', async () => {
+    const user = userEvent.setup();
+    const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
+
+    render(<PrefixesList prefixes={mockPrefixes} />);
+
+    const rdfPrefix = screen.getByText(/rdf:/).closest('.prefix-item');
+
+    if (rdfPrefix) {
+      await user.keyboard('{Control>}');
+      await user.click(rdfPrefix);
+      await user.keyboard('{/Control}');
+    }
+
+    expect(openSpy).toHaveBeenCalledWith('http://www.w3.org/1999/02/22-rdf-syntax-ns#', '_blank');
+
+    openSpy.mockRestore();
+  });
+
   it('shows "Copied!" indicator after copying', async () => {
     const user = userEvent.setup();
     const writeTextMock = vi.fn().mockResolvedValue(undefined);
@@ -170,7 +191,7 @@ describe('PrefixesList', () => {
     const rdfPrefix = screen.getByText(/rdf:/).closest('.prefix-item');
     expect(rdfPrefix).toHaveAttribute(
       'title',
-      'Click to copy: @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .'
+      'Click to copy: @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .\nCtrl+Click to open URL'
     );
   });
 
@@ -320,6 +341,20 @@ describe('PrefixesList', () => {
     expect(sparqlButton).toHaveClass('active');
     const rdfButton = screen.getByText('RDF');
     expect(rdfButton).not.toHaveClass('active');
+  });
+
+  it('switches back to RDF format when clicked', async () => {
+    const user = userEvent.setup();
+    render(<PrefixesList prefixes={mockPrefixes} />);
+
+    const sparqlButton = screen.getByText('SPARQL');
+    await user.click(sparqlButton);
+    expect(sparqlButton).toHaveClass('active');
+
+    const rdfButton = screen.getByText('RDF');
+    await user.click(rdfButton);
+    expect(rdfButton).toHaveClass('active');
+    expect(sparqlButton).not.toHaveClass('active');
   });
 
   it('displays prefixes in RDF format by default', () => {
