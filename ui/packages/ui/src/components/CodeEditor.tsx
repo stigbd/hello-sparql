@@ -1,6 +1,6 @@
 import Prism from 'prismjs';
 import type React from 'react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 // Import theme
 import 'prismjs/themes/prism-okaidia.css';
 // Import languages
@@ -15,6 +15,7 @@ export interface CodeEditorProps {
   readOnly?: boolean;
   className?: string;
   minHeight?: string;
+  maxHeight?: string;
 }
 
 export const CodeEditor: React.FC<CodeEditorProps> = ({
@@ -25,6 +26,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   readOnly = false,
   className = '',
   minHeight = '300px',
+  maxHeight = '600px',
 }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const preRef = useRef<HTMLPreElement>(null);
@@ -68,6 +70,34 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 
     highlight();
   }, [value, prismLanguage]);
+
+  // Auto-resize editor
+  // biome-ignore lint/correctness/useExhaustiveDependencies: value affects scrollHeight indirectly through textarea content
+  useLayoutEffect(() => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      // Store scroll position to prevent jumping
+      const currentScrollTop = textarea.scrollTop;
+
+      textarea.style.height = 'auto';
+
+      const scrollHeight = textarea.scrollHeight;
+      const maxH = Number.parseInt(maxHeight.replace('px', ''), 10);
+
+      if (!Number.isNaN(maxH) && scrollHeight > maxH) {
+        textarea.style.height = `${maxH}px`;
+        textarea.style.overflowY = 'auto';
+      } else {
+        textarea.style.height = `${scrollHeight}px`;
+        textarea.style.overflowY = 'hidden';
+      }
+
+      // Restore scroll position
+      if (currentScrollTop > 0) {
+        textarea.scrollTop = currentScrollTop;
+      }
+    }
+  }, [value, maxHeight]);
 
   // Sync scroll between textarea and pre element
   const handleScroll = () => {
@@ -159,10 +189,9 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
           backgroundColor: 'transparent',
           color: 'transparent',
           caretColor: '#f8f8f2',
-          resize: 'vertical',
+          resize: 'none',
           outline: 'none',
           boxSizing: 'border-box',
-          overflow: 'auto',
           whiteSpace: 'pre-wrap',
           wordWrap: 'break-word',
         }}
